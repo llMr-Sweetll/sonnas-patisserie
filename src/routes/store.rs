@@ -80,6 +80,34 @@ pub struct TermsTemplate {
 }
 
 #[derive(Template)]
+#[template(path = "refunds.html")]
+pub struct RefundsTemplate {
+    pub categories: Vec<Category>,
+    pub cart_count: usize,
+}
+
+#[derive(Template)]
+#[template(path = "shipping.html")]
+pub struct ShippingTemplate {
+    pub categories: Vec<Category>,
+    pub cart_count: usize,
+}
+
+#[derive(Template)]
+#[template(path = "contact.html")]
+pub struct ContactTemplate {
+    pub categories: Vec<Category>,
+    pub cart_count: usize,
+}
+
+#[derive(Template)]
+#[template(path = "pricing.html")]
+pub struct PricingTemplate {
+    pub categories: Vec<Category>,
+    pub cart_count: usize,
+}
+
+#[derive(Template)]
 #[template(path = "404.html")]
 pub struct NotFoundTemplate {
     pub categories: Vec<Category>,
@@ -94,6 +122,10 @@ crate::impl_template_response!(
     OrderTemplate,
     PrivacyTemplate,
     TermsTemplate,
+    RefundsTemplate,
+    ShippingTemplate,
+    ContactTemplate,
+    PricingTemplate,
     NotFoundTemplate,
 );
 
@@ -239,6 +271,34 @@ async fn terms(State(state): State<AppState>, jar: CookieJar) -> AppResult<Terms
     })
 }
 
+async fn refunds(State(state): State<AppState>, jar: CookieJar) -> AppResult<RefundsTemplate> {
+    Ok(RefundsTemplate {
+        categories: db::list_categories(&state.db).await?,
+        cart_count: read_cart(&jar).len(),
+    })
+}
+
+async fn shipping(State(state): State<AppState>, jar: CookieJar) -> AppResult<ShippingTemplate> {
+    Ok(ShippingTemplate {
+        categories: db::list_categories(&state.db).await?,
+        cart_count: read_cart(&jar).len(),
+    })
+}
+
+async fn contact(State(state): State<AppState>, jar: CookieJar) -> AppResult<ContactTemplate> {
+    Ok(ContactTemplate {
+        categories: db::list_categories(&state.db).await?,
+        cart_count: read_cart(&jar).len(),
+    })
+}
+
+async fn pricing(State(state): State<AppState>, jar: CookieJar) -> AppResult<PricingTemplate> {
+    Ok(PricingTemplate {
+        categories: db::list_categories(&state.db).await?,
+        cart_count: read_cart(&jar).len(),
+    })
+}
+
 /// Liveness/readiness probe: 200 only when the database answers.
 async fn health(State(state): State<AppState>) -> impl IntoResponse {
     match sqlx::query("select 1").execute(&state.db).await {
@@ -256,5 +316,9 @@ pub fn router() -> Router<AppState> {
         .route("/order/{number}", get(order_page))
         .route("/privacy", get(privacy))
         .route("/terms", get(terms))
+        .route("/refunds", get(refunds))
+        .route("/shipping", get(shipping))
+        .route("/contact", get(contact))
+        .route("/pricing", get(pricing))
         .route("/health", get(health))
 }
