@@ -1,20 +1,20 @@
 [package]
 name = "sonnas-patisserie"
 version = "0.1.0"
-edition = "2021"
-description = "Sonna's Patisserie — cloud-kitchen cake shop: storefront, WhatsApp ordering bot, admin backend"
+edition = "2024"
+description = "Sonna's Patisserie — Hubli's artisanal cake shop: storefront, WhatsApp ordering bot, admin backend"
 license = "AGPL-3.0-only"
 
 [dependencies]
-axum = { version = "0.8", features = ["multipart", "macros"] }
+axum = { version = "0.8.9", features = ["multipart", "macros"] }
 axum-extra = { version = "0.10", features = ["cookie"] }
 tokio = { version = "1", features = ["macros", "rt-multi-thread", "net"] }
 tower = { version = "0.5", features = ["util"] }
 tower-http = { version = "0.6", features = ["trace"] }
 hyper = { version = "1", features = ["full"] }
 askama = "0.12"
-sqlx = { version = "0.8", default-features = false, features = [
-    "postgres", "runtime-tokio", "tls-rustls", "chrono", "derive", "uuid",
+sqlx = { version = "0.9", default-features = false, features = [
+    "postgres", "runtime-tokio", "tls-rustls", "chrono", "derive", "uuid", "json",
 ] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"

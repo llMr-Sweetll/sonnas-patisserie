@@ -108,7 +108,8 @@ async fn run_migrations(pool: &PgPool) -> sqlx::Result<()> {
                 .await?
                 .rows_affected();
         if inserted == 1 {
-            sqlx::raw_sql(sql).execute(&mut *tx).await?;
+            // Migration files are compile-time `include_str!` statics — safe to run raw.
+            sqlx::raw_sql(*sql).execute(&mut *tx).await?;
         }
         tx.commit().await?;
     }

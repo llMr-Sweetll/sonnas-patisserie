@@ -67,10 +67,10 @@ async fn razorpay_webhook(
         return StatusCode::OK;
     }
 
-    if let Ok(Some(order)) = db::mark_paid(&state.db, &order_number, &payment_id).await {
-        if let Ok(items) = db::order_items(&state.db, order.id).await {
-            whatsapp::notify_order_paid(&state, &order, &items).await;
-        }
+    if let Ok(Some(order)) = db::mark_paid(&state.db, &order_number, &payment_id).await
+        && let Ok(items) = db::order_items(&state.db, order.id).await
+    {
+        whatsapp::notify_order_paid(&state, &order, &items).await;
     }
     StatusCode::OK
 }
