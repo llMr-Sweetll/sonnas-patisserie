@@ -2,7 +2,7 @@ use chrono::NaiveDate;
 use rand::Rng;
 use sqlx::{PgPool, Postgres, Transaction};
 
-use crate::models::{CartLine, Category, Order, OrderItem, Product};
+use crate::models::{CartLine, Category, Customer, Order, OrderItem, Product, Promotion};
 
 pub async fn list_categories(pool: &PgPool) -> sqlx::Result<Vec<Category>> {
     sqlx::query_as("select * from categories order by sort_order, id")
@@ -370,4 +370,258 @@ pub async fn wa_session_save(
     .execute(pool)
     .await?;
     Ok(())
+}
+
+// --- Product images (stored in Postgres) ---
+
+pub async fn insert_image(pool: &PgPool, bytes: &[u8], content_type: &str) -> sqlx::Result<i64> {
+    let row: (i64,) = sqlx::query_as(
+        "insert into product_images (bytes, content_type) values ($1, $2) returning id",
+    )
+    .bind(bytes)
+    .bind(content_type)
+    .fetch_one(pool)
+    .await?;
+    Ok(row.0)
+}
+
+pub async fn get_image(pool: &PgPool, id: i64) -> sqlx::Result<Option<(Vec<u8>, String)>> {
+    let row: Option<(Vec<u8>, String)> =
+        sqlx::query_as("select bytes, content_type from product_images where id = $1")
+            .bind(id)
+            .fetch_optional(pool)
+            .await?;
+    Ok(row)
+}
+
+// --- Customers ---
+
+/// Records/updates a customer on a paid order (called from the webhook path).
+pub async fn upsert_customer_order(
+    pool: &PgPool,
+    phone: &str,
+    name: &str,
+    email: Option<&str>,
+    spent_inr: i64,
+) -> sqlx::Result<()> {
+    sqlx::query(
+        "insert into customers (phone, name, email, orders_count, total_spent_inr, last_order_at) \
+         values ($1, $2, $3, 1, $4, now()) \
+         on conflict (phone) do update set \
+            name = coalesce(excluded.name, customers.name), \
+            email = coalesce(excluded.email, customers.email), \
+            orders_count = customers.orders_count + 1, \
+            total_spent_inr = customers.total_spent_inr + excluded.total_spent_inr, \
+            last_order_at = now()",
+    )
+    .bind(phone)
+    .bind(name)
+    .bind(email)
+    .bind(spent_inr)
+    .execute(pool)
+    .await?;
+    Ok(())
+}
+
+/// Records a birthday captured by the WhatsApp bot (opt-in).
+pub async fn set_customer_birthday(
+    pool: &PgPool,
+    phone: &str,
+    name: Option<&str>,
+    birthday: chrono::NaiveDate,
+) -> sqlx::Result<()> {
+    sqlx::query(
+        "insert into customers (phone, name, birthday, marketing_opt_in) values ($1, $2, $3, true) \
+         on conflict (phone) do update set \
+            birthday = excluded.birthday, \
+            name = coalesce(customers.name, excluded.name), \
+            marketing_opt_in = true",
+    )
+    .bind(phone)
+    .bind(name)
+    .bind(birthday)
+    .execute(pool)
+    .await?;
+    Ok(())
+}
+
+pub async fn list_customers(pool: &PgPool, limit: i64) -> sqlx::Result<Vec<Customer>> {
+    sqlx::query_as("select * from customers order by last_order_at desc nulls last, first_seen desc limit $1")
+        .bind(limit)
+        .fetch_all(pool)
+        .await
+}
+
+/// Customers whose birthday is today and who haven't been greeted this year.
+pub async fn birthdays_due_today(pool: &PgPool) -> sqlx::Result<Vec<Customer>> {
+    sqlx::query_as(
+        "select c.* from customers c \
+         where c.birthday is not null and c.marketing_opt_in \
+           and extract(month from c.birthday) = extract(month from current_date) \
+           and extract(day from c.birthday) = extract(day from current_date) \
+           and not exists ( \
+             select 1 from birthday_log b \
+             where b.customer_phone = c.phone \
+               and extract(year from b.sent_on) = extract(year from current_date))",
+    )
+    .fetch_all(pool)
+    .await
+}
+
+pub async fn log_birthday_sent(pool: &PgPool, phone: &str) -> sqlx::Result<()> {
+    sqlx::query(
+        "insert into birthday_log (customer_phone, sent_on) values ($1, current_date) \
+         on conflict do nothing",
+    )
+    .bind(phone)
+    .execute(pool)
+    .await?;
+    Ok(())
+}
+
+// --- Promotions ---
+
+pub async fn active_promotions(pool: &PgPool) -> sqlx::Result<Vec<Promotion>> {
+    sqlx::query_as("select * from promotions where active order by sort_order, id")
+        .fetch_all(pool)
+        .await
+}
+
+pub async fn all_promotions(pool: &PgPool) -> sqlx::Result<Vec<Promotion>> {
+    sqlx::query_as("select * from promotions order by sort_order, id")
+        .fetch_all(pool)
+        .await
+}
+
+pub async fn promotion_by_id(pool: &PgPool, id: i64) -> sqlx::Result<Option<Promotion>> {
+    sqlx::query_as("select * from promotions where id = $1")
+        .bind(id)
+        .fetch_optional(pool)
+        .await
+}
+
+pub struct PromotionInput {
+    pub title: String,
+    pub subtitle: String,
+    pub cta_label: String,
+    pub cta_href: String,
+    pub image_url: String,
+    pub active: bool,
+    pub sort_order: i32,
+}
+
+pub async fn insert_promotion(pool: &PgPool, p: &PromotionInput) -> sqlx::Result<()> {
+    sqlx::query(
+        "insert into promotions (title, subtitle, cta_label, cta_href, image_url, active, sort_order) \
+         values ($1, $2, $3, $4, $5, $6, $7)",
+    )
+    .bind(&p.title).bind(&p.subtitle).bind(&p.cta_label).bind(&p.cta_href)
+    .bind(&p.image_url).bind(p.active).bind(p.sort_order)
+    .execute(pool)
+    .await?;
+    Ok(())
+}
+
+pub async fn update_promotion(pool: &PgPool, id: i64, p: &PromotionInput) -> sqlx::Result<()> {
+    sqlx::query(
+        "update promotions set title=$2, subtitle=$3, cta_label=$4, cta_href=$5, \
+         image_url=$6, active=$7, sort_order=$8 where id=$1",
+    )
+    .bind(id)
+    .bind(&p.title).bind(&p.subtitle).bind(&p.cta_label).bind(&p.cta_href)
+    .bind(&p.image_url).bind(p.active).bind(p.sort_order)
+    .execute(pool)
+    .await?;
+    Ok(())
+}
+
+// --- Bestsellers ("Loved this week") ---
+
+/// Top products by quantity sold in the last 14 days (paid orders).
+/// Falls back to featured products when there's no recent sales history.
+pub async fn bestsellers(pool: &PgPool, limit: i64) -> sqlx::Result<Vec<Product>> {
+    let top: Vec<Product> = sqlx::query_as(
+        "select p.* from products p \
+         join order_items i on i.product_id = p.id \
+         join orders o on o.id = i.order_id \
+         where p.is_available and o.status <> 'pending' and o.status <> 'cancelled' \
+           and o.created_at > now() - interval '14 days' \
+         group by p.id order by sum(i.qty) desc limit $1",
+    )
+    .bind(limit)
+    .fetch_all(pool)
+    .await?;
+    if top.is_empty() {
+        return featured_products(pool).await;
+    }
+    Ok(top)
+}
+
+// --- Extended analytics ---
+
+#[derive(Debug, sqlx::FromRow)]
+pub struct DayCount {
+    pub day: chrono::NaiveDate,
+    pub count: i64,
+}
+
+pub async fn new_customers_by_day(pool: &PgPool) -> sqlx::Result<Vec<DayCount>> {
+    sqlx::query_as(
+        "select d::date as day, count(c.phone)::bigint as count \
+         from generate_series(current_date - 29, current_date, interval '1 day') d \
+         left join customers c on c.first_seen::date = d::date \
+         group by d order by d",
+    )
+    .fetch_all(pool)
+    .await
+}
+
+#[derive(Debug, sqlx::FromRow)]
+pub struct LabeledValue {
+    pub label: String,
+    pub value: i64,
+}
+
+pub async fn revenue_by_category(pool: &PgPool) -> sqlx::Result<Vec<LabeledValue>> {
+    sqlx::query_as(
+        "select cat.name as label, coalesce(sum(i.qty * i.unit_price_inr),0)::bigint as value \
+         from categories cat \
+         left join products p on p.category_id = cat.id \
+         left join order_items i on i.product_id = p.id \
+         left join orders o on o.id = i.order_id and o.status <> 'pending' and o.status <> 'cancelled' \
+           and o.created_at > now() - interval '30 days' \
+         group by cat.name order by value desc",
+    )
+    .fetch_all(pool)
+    .await
+}
+
+pub async fn orders_by_source(pool: &PgPool) -> sqlx::Result<Vec<LabeledValue>> {
+    sqlx::query_as(
+        "select source as label, count(*)::bigint as value from orders \
+         where created_at > now() - interval '30 days' group by source order by value desc",
+    )
+    .fetch_all(pool)
+    .await
+}
+
+pub async fn popular_slots(pool: &PgPool) -> sqlx::Result<Vec<LabeledValue>> {
+    sqlx::query_as(
+        "select delivery_slot as label, count(*)::bigint as value from orders \
+         where status <> 'pending' and status <> 'cancelled' \
+           and created_at > now() - interval '30 days' \
+         group by delivery_slot order by value desc",
+    )
+    .fetch_all(pool)
+    .await
+}
+
+/// (total customers, repeat customers with >1 order) over all time.
+pub async fn customer_stats(pool: &PgPool) -> sqlx::Result<(i64, i64)> {
+    let row: (i64, i64) = sqlx::query_as(
+        "select count(*)::bigint, count(*) filter (where orders_count > 1)::bigint from customers",
+    )
+    .fetch_one(pool)
+    .await?;
+    Ok(row)
 }

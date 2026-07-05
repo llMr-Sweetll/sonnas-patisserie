@@ -58,6 +58,38 @@ pub struct OrderItem {
     pub customization: Option<String>,
 }
 
+#[derive(Debug, Clone, FromRow)]
+pub struct Customer {
+    pub phone: String,
+    pub name: Option<String>,
+    pub email: Option<String>,
+    pub birthday: Option<NaiveDate>,
+    pub marketing_opt_in: bool,
+    pub orders_count: i32,
+    pub total_spent_inr: i64,
+    pub first_seen: DateTime<Utc>,
+    pub last_order_at: Option<DateTime<Utc>>,
+    pub notes: Option<String>,
+}
+
+impl Customer {
+    pub fn birthday_str(&self) -> String {
+        self.birthday.map(|d| d.format("%d %b").to_string()).unwrap_or_default()
+    }
+}
+
+#[derive(Debug, Clone, FromRow)]
+pub struct Promotion {
+    pub id: i64,
+    pub title: String,
+    pub subtitle: String,
+    pub cta_label: String,
+    pub cta_href: String,
+    pub image_url: String,
+    pub active: bool,
+    pub sort_order: i32,
+}
+
 /// One line in a cart — shared by the web cookie cart and the WhatsApp bot cart.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CartLine {

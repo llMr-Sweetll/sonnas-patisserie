@@ -89,6 +89,7 @@ const MIGRATIONS: &[(&str, &str)] = &[
         "0004_real_photos",
         include_str!("../migrations/0004_real_photos.sql"),
     ),
+    ("0005_growth", include_str!("../migrations/0005_growth.sql")),
 ];
 
 async fn run_migrations(pool: &PgPool) -> sqlx::Result<()> {
@@ -264,6 +265,27 @@ async fn product_image(
     }
 }
 
+/// Admin-uploaded product photos, stored as bytes in Postgres.
+async fn db_image(
+    axum::extract::State(state): axum::extract::State<AppState>,
+    axum::extract::Path(id): axum::extract::Path<i64>,
+) -> axum::response::Response {
+    match db::get_image(&state.db, id).await {
+        Ok(Some((bytes, content_type))) => (
+            [
+                (header::CONTENT_TYPE, content_type),
+                (
+                    header::CACHE_CONTROL,
+                    "public, max-age=604800, immutable".to_string(),
+                ),
+            ],
+            bytes,
+        )
+            .into_response(),
+        _ => axum::http::StatusCode::NOT_FOUND.into_response(),
+    }
+}
+
 async fn security_headers(req: axum::extract::Request, next: Next) -> Response {
     let mut res = next.run(req).await;
     let h = res.headers_mut();
@@ -298,6 +320,7 @@ pub fn build_router(state: AppState) -> Router {
         .route("/public/style.css", axum::routing::get(style_css))
         .route("/public/payment.js", axum::routing::get(payment_js))
         .route("/img/{name}", axum::routing::get(product_image))
+        .route("/img/db/{id}", axum::routing::get(db_image))
         .layer(middleware::from_fn(security_headers))
         .with_state(state)
 }
