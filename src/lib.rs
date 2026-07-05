@@ -79,6 +79,37 @@ pub struct AppState {
     pub http: reqwest::Client,
 }
 
+// ponytail: hand-rolled migration runner — sqlx::migrate! drags in the whole
+// macros/mysql subtree (incl. RUSTSEC-2023-0071's rsa). Add new files here in order.
+const MIGRATIONS: &[(&str, &str)] = &[
+    ("0001_schema", include_str!("../migrations/0001_schema.sql")),
+    ("0002_seed", include_str!("../migrations/0002_seed.sql")),
+];
+
+async fn run_migrations(pool: &PgPool) -> sqlx::Result<()> {
+    sqlx::raw_sql(
+        "create table if not exists _migrations \
+         (name text primary key, applied_at timestamptz not null default now())",
+    )
+    .execute(pool)
+    .await?;
+    for (name, sql) in MIGRATIONS {
+        let mut tx = pool.begin().await?;
+        // The insert serialises concurrent starters: only the winner runs the file.
+        let inserted =
+            sqlx::query("insert into _migrations (name) values ($1) on conflict do nothing")
+                .bind(name)
+                .execute(&mut *tx)
+                .await?
+                .rows_affected();
+        if inserted == 1 {
+            sqlx::raw_sql(sql).execute(&mut *tx).await?;
+        }
+        tx.commit().await?;
+    }
+    Ok(())
+}
+
 pub async fn connect_db() -> PgPool {
     let url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     let pool = PgPoolOptions::new()
@@ -86,10 +117,7 @@ pub async fn connect_db() -> PgPool {
         .connect(&url)
         .await
         .expect("failed to connect to Postgres");
-    sqlx::migrate!()
-        .run(&pool)
-        .await
-        .expect("migrations failed");
+    run_migrations(&pool).await.expect("migrations failed");
     pool
 }
 

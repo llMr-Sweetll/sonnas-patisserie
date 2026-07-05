@@ -1,0 +1,6 @@
+# RUSTSEC-2023-0071 (rsa: Marvin timing sidechannel) is reachable only through
+# sqlx-mysql, which this project does not enable — `cargo tree` contains neither
+# rsa nor sqlx-mysql; the entry exists in Cargo.lock only because lockfiles record
+# the union of optional features. No fixed rsa release exists yet.
+[advisories]
+ignore = ["RUSTSEC-2023-0071"]

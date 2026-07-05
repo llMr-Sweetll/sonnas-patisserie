@@ -34,7 +34,11 @@ The same router runs two ways:
 - `wa_sessions` — one row per customer phone: bot `state`, `cart` (JSON), `context`
   (name/address/date collected during checkout).
 
-Migrations are embedded (`sqlx::migrate!`) and run idempotently at startup.
+Migrations are embedded via `include_str!` and run idempotently at startup by a
+small runner in `src/lib.rs` (a `_migrations` table records applied files; the
+insert serialises concurrent cold starts). Deliberately not `sqlx::migrate!` —
+the macros subtree pulls in sqlx-mysql and with it the unfixed RUSTSEC-2023-0071
+`rsa` advisory.
 
 ## Key flows
 
