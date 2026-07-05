@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Sonna's Patisserie — Artisanal cakes & desserts, Hubli{% endblock %}</title>
+  <meta name="description" content="100% vegetarian artisanal cakes and desserts, baked fresh in Hubli and delivered to your door. Order online or on WhatsApp.">
+  <link rel="stylesheet" href="/public/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="/">Sonna's<span class="brand-tail">Patisserie</span></a>
+    <nav class="site-nav">
+      {% for c in categories %}
+      <a href="/category/{{ c.slug }}">{{ c.name }}</a>
+      {% endfor %}
+    </nav>
+    <a class="cart-link" href="/cart">Cart{% if cart_count > 0 %} <span class="cart-badge">{{ cart_count }}</span>{% endif %}</a>
+  </header>
+
+  <main>
+  {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-grid">
+      <div>
+        <p class="footer-brand">Sonna's Patisserie</p>
+        <p>100% vegetarian · baked fresh every day</p>
+      </div>
+      <div>
+        <p>Akshay Colony, Vidya Nagar, Hubli</p>
+        <p>Delivery 2pm – 10pm · closed Tuesdays</p>
+      </div>
+      <div>
+        <p><a href="https://wa.me/919113231424">WhatsApp +91 91132 31424</a></p>
+        <p><a href="https://www.instagram.com/sonnas___/">Instagram @sonnas___</a></p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

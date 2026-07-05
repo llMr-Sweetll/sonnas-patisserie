@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero">
+  <p class="hero-eyebrow">Cloud kitchen · Hubli, Karnataka</p>
+  <h1>Baked <em>fresh</em>, delivered <em>to your door</em>.</h1>
+  <p class="hero-sub">Artisanal cakes & desserts — couverture chocolate, all-natural cocoa butter, 100% vegetarian.</p>
+  <div class="hero-actions">
+    <a class="btn btn-saffron" href="#featured">Order online</a>
+    <a class="btn btn-outline" href="https://wa.me/919113231424?text=Hi%20Sonna%27s%21%20I%27d%20like%20to%20order%20a%20cake.">Order on WhatsApp</a>
+  </div>
+  <p class="trust-line">100% vegetarian · eggless available · same-day delivery · closed Tuesdays</p>
+</section>
+
+<section id="featured" class="section">
+  <h2 class="section-title">Signatures</h2>
+  <div class="product-grid">
+    {% for p in featured %}
+    {% include "_card.html" %}
+    {% endfor %}
+  </div>
+</section>
+
+<section class="section">
+  <h2 class="section-title">The menu</h2>
+  <div class="category-grid">
+    {% for c in categories %}
+    <a class="category-card" href="/category/{{ c.slug }}">{{ c.name }}</a>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

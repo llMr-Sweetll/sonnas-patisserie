@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Admin — Sonna's Patisserie{% endblock %}</title>
+  <meta name="robots" content="noindex">
+  <link rel="stylesheet" href="/public/style.css">
+</head>
+<body class="admin-body">
+  <header class="admin-header">
+    <a class="brand" href="/admin">Sonna's <span class="brand-tail">Admin</span></a>
+    <nav>
+      <a href="/admin">Dashboard</a>
+      <a href="/admin/orders">Orders</a>
+      <a href="/admin/products">Products</a>
+    </nav>
+    <form method="post" action="/admin/logout"><button type="submit">Log out</button></form>
+  </header>
+  <main class="admin-main">
+  {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

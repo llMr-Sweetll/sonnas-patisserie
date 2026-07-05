@@ -1,0 +1,25 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<h1 class="admin-title">Products</h1>
+<p style="margin-bottom: 1rem;"><a class="btn btn-saffron" href="/admin/products/new">Add product</a></p>
+<div class="panel">
+  <table class="admin-table">
+    <thead><tr><th>Name</th><th>Category</th><th>Price</th><th>Available</th><th>Featured</th><th></th></tr></thead>
+    <tbody>
+      {% for p in products %}
+      <tr>
+        <td>{{ p.name }}</td>
+        <td>
+          {% for c in categories %}{% if c.id == p.category_id %}{{ c.name }}{% endif %}{% endfor %}
+        </td>
+        <td>₹{{ p.price_inr }}</td>
+        <td>{% if p.is_available %}Yes{% else %}No{% endif %}</td>
+        <td>{% if p.is_featured %}★{% else %}—{% endif %}</td>
+        <td><a href="/admin/products/{{ p.id }}">Edit</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

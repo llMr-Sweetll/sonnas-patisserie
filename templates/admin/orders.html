@@ -1,0 +1,24 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<h1 class="admin-title">Orders</h1>
+<div class="panel">
+  <table class="admin-table">
+    <thead><tr><th>Order</th><th>Placed</th><th>Customer</th><th>Phone</th><th>Total</th><th>Status</th><th>Source</th><th>Delivery</th></tr></thead>
+    <tbody>
+      {% for o in orders %}
+      <tr>
+        <td><a href="/admin/orders/{{ o.id }}" class="mono">{{ o.order_number }}</a></td>
+        <td>{{ o.created_at.format("%d %b %H:%M") }}</td>
+        <td>{{ o.customer_name }}</td>
+        <td>{{ o.phone }}</td>
+        <td>₹{{ o.total_inr }}</td>
+        <td>{{ o.status }}</td>
+        <td>{{ o.source }}</td>
+        <td>{{ o.delivery_date }} {{ o.delivery_slot }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

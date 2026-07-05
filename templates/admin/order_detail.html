@@ -1,0 +1,48 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<h1 class="admin-title">Order <span class="mono">{{ order.order_number }}</span></h1>
+
+<div class="panel">
+  <h2>Items</h2>
+  <table class="admin-table">
+    <thead><tr><th>Item</th><th>Qty</th><th>Eggless</th><th>Message on cake</th><th>Total</th></tr></thead>
+    <tbody>
+      {% for i in items %}
+      <tr>
+        <td>{{ i.product_name }}</td>
+        <td>{{ i.qty }}</td>
+        <td>{% if i.eggless %}Yes{% else %}—{% endif %}</td>
+        <td>{% if let Some(c) = i.customization %}“{{ c }}”{% else %}—{% endif %}</td>
+        <td>₹{{ i.line_total() }}</td>
+      </tr>
+      {% endfor %}
+      <tr><td colspan="4"><strong>Total</strong></td><td><strong>₹{{ order.total_inr }}</strong></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="panel">
+  <h2>Customer & delivery</h2>
+  <p>{{ order.customer_name }} · {{ order.phone }}{% if let Some(e) = order.email %} · {{ e }}{% endif %}</p>
+  <p>{{ order.address }}</p>
+  <p>{{ order.delivery_date }} · {{ order.delivery_slot }} · placed via {{ order.source }}</p>
+  {% if let Some(n) = order.notes %}<p>Notes: {{ n }}</p>{% endif %}
+  {% if let Some(p) = order.razorpay_payment_id %}<p class="mono">Payment: {{ p }}</p>{% endif %}
+</div>
+
+<div class="panel">
+  <h2>Status — currently “{{ order.status }}”</h2>
+  <form method="post" action="/admin/orders/{{ order.id }}/status" class="admin-form">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <label>Move to
+      <select name="status">
+        {% for s in statuses %}
+        <option value="{{ s }}" {% if order.has_status(s) %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <button class="btn btn-saffron" type="submit">Update & notify on WhatsApp</button>
+  </form>
+</div>
+{% endblock %}

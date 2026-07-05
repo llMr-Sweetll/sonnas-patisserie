@@ -1,0 +1,67 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<h1 class="admin-title">Last 30 days</h1>
+
+<div class="stat-row">
+  <div class="stat-tile"><div class="stat-value">₹{{ revenue_30d }}</div><div class="stat-label">Revenue</div></div>
+  <div class="stat-tile"><div class="stat-value">{{ orders_30d }}</div><div class="stat-label">Paid orders</div></div>
+  <div class="stat-tile"><div class="stat-value">₹{{ aov }}</div><div class="stat-label">Average order</div></div>
+  <div class="stat-tile"><div class="stat-value">{{ pending_count }}</div><div class="stat-label">To fulfil</div></div>
+</div>
+
+<div class="panel">
+  <h2>Revenue by day</h2>
+  <svg class="chart-svg" viewBox="0 0 640 168" role="img" aria-label="Daily revenue for the last 30 days">
+    {% for b in revenue_bars %}
+    <rect x="{{ b.x }}" y="{{ b.y }}" width="{{ b.w }}" height="{{ b.h }}" rx="2" fill="#B97F14">
+      <title>{{ b.label }} — {{ b.value }}</title>
+    </rect>
+    {% endfor %}
+    <line x1="0" y1="161" x2="640" y2="161" stroke="#d8d0c2" stroke-width="1"/>
+  </svg>
+  <p class="chart-note">Hover a bar for the day's numbers. Paid orders only.</p>
+</div>
+
+<div class="panel">
+  <h2>Top products</h2>
+  {% if top_products.is_empty() %}
+  <p class="empty-note">No paid orders yet.</p>
+  {% else %}
+  {% for t in top_products %}
+  <div class="hbar-row">
+    <span>{{ t.product_name }}</span>
+    <div class="hbar-track"><div class="hbar-fill" style="width: {{ t.revenue_inr * 100 / top_max }}%"></div></div>
+    <span class="hbar-value">₹{{ t.revenue_inr }} · {{ t.qty }}</span>
+  </div>
+  {% endfor %}
+  {% endif %}
+</div>
+
+<div class="panel">
+  <h2>Orders by status</h2>
+  <div class="chip-row">
+    {% for s in status_counts %}
+    <span class="chip">{{ s.status }} · {{ s.count }}</span>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="panel">
+  <h2>Recent orders</h2>
+  <table class="admin-table">
+    <thead><tr><th>Order</th><th>Customer</th><th>Total</th><th>Status</th><th>Delivery</th></tr></thead>
+    <tbody>
+      {% for o in recent %}
+      <tr>
+        <td><a href="/admin/orders/{{ o.id }}" class="mono">{{ o.order_number }}</a></td>
+        <td>{{ o.customer_name }}</td>
+        <td>₹{{ o.total_inr }}</td>
+        <td>{{ o.status }}</td>
+        <td>{{ o.delivery_date }} {{ o.delivery_slot }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

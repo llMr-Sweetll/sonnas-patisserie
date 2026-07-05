@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.name }} — Sonna's Patisserie{% endblock %}
+
+{% block content %}
+<section class="section product-page">
+  <div class="product-media">
+    {% if product.image_url.is_empty() %}
+    <div class="tile tile-lg tile-{{ product.tile_variant() }}"><span>{{ product.initial() }}</span></div>
+    {% else %}
+    <img src="{{ product.image_url }}" alt="{{ product.name }}">
+    {% endif %}
+  </div>
+  <div class="product-info">
+    <h1>{{ product.name }}</h1>
+    <p class="price price-lg">₹{{ product.price_inr }}</p>
+    <p class="product-desc">{{ product.description }}</p>
+
+    {% if product.is_available %}
+    <form class="add-form" method="post" action="/cart/add">
+      <input type="hidden" name="product_id" value="{{ product.id }}">
+      <label>Quantity
+        <input type="number" name="qty" value="1" min="1" max="20">
+      </label>
+      {% if product.is_eggless_available %}
+      <label class="check">
+        <input type="checkbox" name="eggless"> Make it eggless
+      </label>
+      {% endif %}
+      <label>Message on the cake <span class="hint">(optional)</span>
+        <input type="text" name="customization" maxlength="200" placeholder="e.g. Happy Birthday Ananya">
+      </label>
+      <button class="btn btn-saffron" type="submit">Add to cart</button>
+    </form>
+    {% else %}
+    <p class="soldout">Sold out today — it'll be back!</p>
+    {% endif %}
+
+    <p class="trust-line">100% vegetarian · baked fresh on the day of delivery</p>
+  </div>
+</section>
+{% endblock %}

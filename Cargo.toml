@@ -11,7 +11,7 @@ axum-extra = { version = "0.9", features = ["cookie"] }
 tokio = { version = "1", features = ["macros", "rt-multi-thread", "net"] }
 tower = { version = "0.5", features = ["util"] }
 tower-http = { version = "0.6", features = ["fs", "trace"] }
-askama = "0.12"
+askama = { version = "0.12", features = ["with-axum"] }
 askama_axum = "0.4"
 sqlx = { version = "0.8", default-features = false, features = [
     "postgres", "runtime-tokio", "tls-rustls", "chrono", "migrate", "macros", "uuid",
@@ -32,6 +32,7 @@ dotenvy = "0.15"
 urlencoding = "2"
 uuid = { version = "1", features = ["v4"] }
 vercel_runtime = "1"
+http-body-util = "0.1"
 
 [[bin]]
 name = "sonnas-patisserie"

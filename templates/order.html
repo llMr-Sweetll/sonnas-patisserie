@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Order {{ order.order_number }} — Sonna's Patisserie{% endblock %}
+
+{% block content %}
+<section class="section narrow">
+  <h1 class="page-title">Order <span class="mono">{{ order.order_number }}</span></h1>
+  <p class="status-pill status-{{ order.status }}">{{ status_text }}</p>
+
+  {% if order.status == "pending" %}
+  <p class="hint">Payment hasn't reached us yet. If you just paid, refresh in a moment — this page updates automatically once Razorpay confirms.</p>
+  {% endif %}
+
+  <div class="order-detail">
+    {% for i in items %}
+    <div class="summary-line">
+      <span>{{ i.product_name }} × {{ i.qty }}{% if i.eggless %} <span class="badge badge-pista">eggless</span>{% endif %}
+        {% if let Some(c) = i.customization %}<br><span class="cart-custom">✍️ “{{ c }}”</span>{% endif %}
+      </span>
+      <span>₹{{ i.line_total() }}</span>
+    </div>
+    {% endfor %}
+    <div class="summary-line summary-total"><span>Total</span><span>₹{{ order.total_inr }}</span></div>
+  </div>
+
+  <div class="order-meta">
+    <p><strong>Delivery</strong> {{ order.delivery_date }} · {{ order.delivery_slot }}</p>
+    <p><strong>To</strong> {{ order.customer_name }} · {{ order.address }}</p>
+  </div>
+
+  <p class="hint">Questions? <a href="https://wa.me/919113231424">WhatsApp us</a> — mention your order number.</p>
+</section>
+{% endblock %}

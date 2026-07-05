@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Checkout — Sonna's Patisserie{% endblock %}
+
+{% block content %}
+<section class="section narrow">
+  <h1 class="page-title">Checkout</h1>
+
+  {% if let Some(err) = error %}
+  <p class="form-error" role="alert">{{ err }}</p>
+  {% endif %}
+
+  <div class="checkout-grid">
+    <form class="checkout-form" method="post" action="/checkout">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <label>Your name
+        <input type="text" name="customer_name" required maxlength="100" autocomplete="name">
+      </label>
+      <label>Phone (WhatsApp updates go here)
+        <input type="tel" name="phone" required pattern="[0-9+ ]{10,15}" autocomplete="tel">
+      </label>
+      <label>Email <span class="hint">(optional)</span>
+        <input type="email" name="email" autocomplete="email">
+      </label>
+      <label>Delivery address in Hubli
+        <textarea name="address" required minlength="10" maxlength="500" rows="3" autocomplete="street-address"></textarea>
+      </label>
+      <div class="field-row">
+        <label>Delivery date
+          <input type="date" name="delivery_date" required min="{{ min_date }}">
+        </label>
+        <label>Time window
+          <select name="delivery_slot" required>
+            {% for s in slots %}
+            <option value="{{ s }}">{{ s }}</option>
+            {% endfor %}
+          </select>
+        </label>
+      </div>
+      <label>Notes for the kitchen <span class="hint">(optional)</span>
+        <textarea name="notes" maxlength="500" rows="2"></textarea>
+      </label>
+      <p class="hint">We deliver 2pm – 10pm and are closed on Tuesdays.</p>
+      <button class="btn btn-saffron btn-wide" type="submit">Continue to payment</button>
+    </form>
+
+    <aside class="order-summary">
+      <h2>Order summary</h2>
+      {% for v in lines %}
+      <div class="summary-line">
+        <span>{{ v.product.name }} × {{ v.line.qty }}{% if v.line.eggless %} <span class="badge badge-pista">eggless</span>{% endif %}</span>
+        <span>₹{{ v.line_total }}</span>
+      </div>
+      {% endfor %}
+      <div class="summary-line summary-total">
+        <span>Total</span><span>₹{{ subtotal }}</span>
+      </div>
+    </aside>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}{{ category.name }} — Sonna's Patisserie{% endblock %}
+
+{% block content %}
+<section class="section">
+  <h1 class="page-title">{{ category.name }}</h1>
+  {% if products.is_empty() %}
+  <p class="empty-note">Nothing here right now — new bakes land often, check back soon.</p>
+  {% else %}
+  <div class="product-grid">
+    {% for p in products %}
+    {% include "_card.html" %}
+    {% endfor %}
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

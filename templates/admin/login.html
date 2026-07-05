@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Log in — Sonna's Patisserie</title>
+  <meta name="robots" content="noindex">
+  <link rel="stylesheet" href="/public/style.css">
+</head>
+<body class="admin-body">
+  <div class="login-wrap">
+    <form class="login-card" method="post" action="/admin/login">
+      <h1>Sonna's Admin</h1>
+      {% if let Some(err) = error %}
+      <p class="form-error" role="alert">{{ err }}</p>
+      {% endif %}
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <label>Password
+        <input type="password" name="password" required autofocus autocomplete="current-password">
+      </label>
+      <button class="btn btn-saffron" type="submit">Log in</button>
+    </form>
+  </div>
+</body>
+</html>

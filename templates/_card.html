@@ -1,0 +1,9 @@
+<a class="product-card" href="/product/{{ p.slug }}">
+  {% if p.image_url.is_empty() %}
+  <div class="tile tile-{{ p.tile_variant() }}"><span>{{ p.initial() }}</span></div>
+  {% else %}
+  <img src="{{ p.image_url }}" alt="{{ p.name }}">
+  {% endif %}
+  <h3>{{ p.name }}</h3>
+  <p class="price">₹{{ p.price_inr }}</p>
+</a>

@@ -1,0 +1,54 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<h1 class="admin-title">
+  {% if product.is_some() %}Edit product{% else %}New product{% endif %}
+</h1>
+
+{% if let Some(err) = error %}
+<p class="form-error" role="alert">{{ err }}</p>
+{% endif %}
+
+{% if let Some(p) = product %}
+<form class="admin-form" method="post" action="/admin/products/{{ p.id }}" enctype="multipart/form-data">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <label>Name <input type="text" name="name" required maxlength="120" value="{{ p.name }}"></label>
+  <label>Slug <input type="text" name="slug" required maxlength="120" value="{{ p.slug }}"></label>
+  <label>Description <textarea name="description" rows="3" maxlength="1000">{{ p.description }}</textarea></label>
+  <label>Price (₹) <input type="number" name="price_inr" required min="1" max="1000000" value="{{ p.price_inr }}"></label>
+  <label>Category
+    <select name="category_id">
+      {% for c in categories %}
+      <option value="{{ c.id }}" {% if c.id == p.category_id %}selected{% endif %}>{{ c.name }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Photo <span class="hint">(jpg/png/webp, replaces current)</span> <input type="file" name="image" accept="image/jpeg,image/png,image/webp"></label>
+  {% if !p.image_url.is_empty() %}<img src="{{ p.image_url }}" alt="Current photo" style="max-width: 160px;">{% endif %}
+  <label class="check"><input type="checkbox" name="is_eggless_available" {% if p.is_eggless_available %}checked{% endif %}> Eggless available</label>
+  <label class="check"><input type="checkbox" name="is_available" {% if p.is_available %}checked{% endif %}> Available for order</label>
+  <label class="check"><input type="checkbox" name="is_featured" {% if p.is_featured %}checked{% endif %}> Featured on the home page</label>
+  <button class="btn btn-saffron" type="submit">Save changes</button>
+</form>
+{% else %}
+<form class="admin-form" method="post" action="/admin/products" enctype="multipart/form-data">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <label>Name <input type="text" name="name" required maxlength="120"></label>
+  <label>Slug <span class="hint">(URL name, e.g. nutella-cheesecake)</span> <input type="text" name="slug" required maxlength="120"></label>
+  <label>Description <textarea name="description" rows="3" maxlength="1000"></textarea></label>
+  <label>Price (₹) <input type="number" name="price_inr" required min="1" max="1000000"></label>
+  <label>Category
+    <select name="category_id">
+      {% for c in categories %}
+      <option value="{{ c.id }}">{{ c.name }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Photo <span class="hint">(jpg/png/webp, optional)</span> <input type="file" name="image" accept="image/jpeg,image/png,image/webp"></label>
+  <label class="check"><input type="checkbox" name="is_eggless_available" checked> Eggless available</label>
+  <label class="check"><input type="checkbox" name="is_available" checked> Available for order</label>
+  <label class="check"><input type="checkbox" name="is_featured"> Featured on the home page</label>
+  <button class="btn btn-saffron" type="submit">Create product</button>
+</form>
+{% endif %}
+{% endblock %}
