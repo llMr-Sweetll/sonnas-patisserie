@@ -2,18 +2,84 @@
 
 {% block content %}
 <section class="hero">
-  <div class="hero-inner">
-    <p class="hero-eyebrow">Cloud kitchen · Hubli, Karnataka</p>
-    <h1>Baked fresh,<br>delivered <em>to your door.</em></h1>
-    <p class="hero-sub">Artisanal cakes & desserts — couverture chocolate, all-natural cocoa butter, 100% vegetarian. Order online, or just chat with us on WhatsApp.</p>
+  <div class="hero-copy">
+    <p class="hero-eyebrow">Hubli's own artisanal bakery</p>
+    <h1>The cake you can <em>trust</em> to be worth it.</h1>
+    <p class="hero-sub">Made in small batches with couverture chocolate, real butter and all-natural cocoa butter — 100% vegetarian, and free of the additives ordinary cakes hide. Order online, or just chat with us on WhatsApp.</p>
     <div class="hero-actions">
       <a class="btn btn-primary" href="#menu">Explore the menu</a>
       <a class="btn btn-wa" href="https://wa.me/919113231424?text=Hi%20Sonna%27s%21%20I%27d%20like%20to%20order%20a%20cake.">Order on WhatsApp</a>
     </div>
     <div class="hero-trust">
+      <span>No bromate</span>
+      <span>No artificial colours</span>
+      <span>No trans fat</span>
       <span>100% vegetarian</span>
-      <span>Eggless available</span>
-      <span>Same-day delivery</span>
+    </div>
+  </div>
+  <div class="hero-panel">
+    {% if let Some(p) = hero_product %}
+    <a class="hero-photo" href="/product/{{ p.slug }}">
+      <img src="{{ p.image_url }}" alt="{{ p.name }}">
+      <span class="hero-photo-tag">{{ p.name }} · ₹{{ p.price_inr }}</span>
+    </a>
+    {% else %}
+    <div class="hero-photo"><img src="/img/hero.jpg" alt="A Sonna's celebration cake"></div>
+    {% endif %}
+    {% if let Some(promo) = promo %}
+    <a class="hero-promo" href="{{ promo.cta_href }}">
+      <span class="hero-promo-kicker">Featured</span>
+      <strong>{{ promo.title }}</strong>
+      <span class="hero-promo-sub">{{ promo.subtitle }}</span>
+      <span class="hero-promo-cta">{{ promo.cta_label }} →</span>
+    </a>
+    {% endif %}
+  </div>
+</section>
+
+{% if !bestsellers.is_empty() %}
+<section class="section">
+  <div class="section-head">
+    <div>
+      <span class="section-kicker">Loved this week</span>
+      <h2 class="section-title">Hubli's current favourites</h2>
+    </div>
+    <a class="section-link" href="#menu">See all →</a>
+  </div>
+  <div class="product-grid">
+    {% for p in bestsellers %}
+    {% include "_card.html" %}
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<section class="promise">
+  <div class="promise-inner">
+    <span class="section-kicker">What we leave out</span>
+    <h2>Most cakes hide things that were banned in Europe. Ours hide nothing.</h2>
+    <p class="promise-lead">Mass-market bakeries reach for cheaper chemistry — additives linked to real harm. We simply don't. Every Sonna's cake is made the honest way.</p>
+    <div class="promise-grid">
+      <div class="promise-card">
+        <span class="promise-x">✕</span>
+        <h3>No potassium bromate</h3>
+        <p>A dough conditioner the IARC calls a possible carcinogen — banned in India since 2016. Never in our kitchen.</p>
+      </div>
+      <div class="promise-card">
+        <span class="promise-x">✕</span>
+        <h3>No artificial colours</h3>
+        <p>No synthetic dyes or titanium dioxide. Colour comes from real fruit, cocoa and nature.</p>
+      </div>
+      <div class="promise-card">
+        <span class="promise-x">✕</span>
+        <h3>No trans fat, no vanaspati</h3>
+        <p>Real butter and couverture chocolate — never hydrogenated shortening.</p>
+      </div>
+      <div class="promise-card">
+        <span class="promise-check">✓</span>
+        <h3>Just real ingredients</h3>
+        <p>100% vegetarian, freshly baked the day it's delivered, eggless on request.</p>
+      </div>
     </div>
   </div>
 </section>
@@ -32,19 +98,6 @@
   </div>
 </section>
 
-<section class="about">
-  <div class="about-media">
-    <img src="/img/about.jpg" alt="A Sonna's cheesecake finished by hand" loading="lazy">
-  </div>
-  <div class="about-body">
-    <span class="section-kicker">Since day one</span>
-    <h2>Small-batch, every single day.</h2>
-    <p>Every cake and dessert is made fresh to order in our Hubli kitchen — no shortcuts, no preservatives, and always fully vegetarian. We work with couverture chocolate, real fruit, and all-natural cocoa butter.</p>
-    <p>Need a name on the cake or an eggless version? Just ask when you order — on the site or over WhatsApp.</p>
-    <a class="btn btn-primary" href="#menu">Browse the menu</a>
-  </div>
-</section>
-
 <section class="section">
   <div class="section-head">
     <div>
@@ -56,6 +109,18 @@
     {% for c in categories %}
     <a class="category-card" href="/category/{{ c.slug }}">{{ c.name }}</a>
     {% endfor %}
+  </div>
+</section>
+
+<section class="local-band">
+  <div class="local-inner">
+    <div class="local-stat"><strong>4.9★</strong><span>on Justdial, 600+ reviews</span></div>
+    <div class="local-stat"><strong>Akshay Colony</strong><span>Vidya Nagar, Hubli</span></div>
+    <div class="local-stat"><strong>2–10pm</strong><span>fresh delivery daily · closed Tuesdays</span></div>
+    <div class="local-cta">
+      <p>Made for Hubli, by Hubli.</p>
+      <a class="btn btn-gold" href="#menu">Order today</a>
+    </div>
   </div>
 </section>
 {% endblock %}

@@ -15,6 +15,9 @@ use crate::{db, AppResult, AppState};
 pub struct IndexTemplate {
     pub categories: Vec<Category>,
     pub featured: Vec<Product>,
+    pub bestsellers: Vec<Product>,
+    pub promo: Option<crate::models::Promotion>,
+    pub hero_product: Option<Product>,
     pub cart_count: usize,
 }
 
@@ -104,9 +107,15 @@ pub async fn not_found(state: &AppState, jar: &CookieJar) -> AppResult<axum::res
 }
 
 async fn home(State(state): State<AppState>, jar: CookieJar) -> AppResult<IndexTemplate> {
+    let featured = db::featured_products(&state.db).await?;
+    // A featured item with a real photo anchors the hero's right panel.
+    let hero_product = featured.iter().find(|p| !p.image_url.is_empty()).cloned();
     Ok(IndexTemplate {
         categories: db::list_categories(&state.db).await?,
-        featured: db::featured_products(&state.db).await?,
+        bestsellers: db::bestsellers(&state.db, 4).await?,
+        promo: db::active_promotions(&state.db).await?.into_iter().next(),
+        hero_product,
+        featured,
         cart_count: read_cart(&jar).len(),
     })
 }

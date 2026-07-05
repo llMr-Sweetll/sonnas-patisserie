@@ -1,7 +1,7 @@
 # Sonna's Patisserie
 
 Online store, WhatsApp ordering bot, and admin backend for **Sonna's Patisserie**
-(Hubli, Karnataka) — a 100% vegetarian artisanal cake & dessert cloud kitchen.
+(Hubli, Karnataka) — a 100% vegetarian artisanal cake & dessert bakery.
 Written entirely in **Rust**.
 
 ## What it does
