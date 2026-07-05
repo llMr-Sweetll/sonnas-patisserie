@@ -1,0 +1,35 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<h1 class="admin-title">{% if promotion.is_some() %}Edit promotion{% else %}New promotion{% endif %}</h1>
+
+{% if let Some(err) = error %}
+<p class="form-error" role="alert">{{ err }}</p>
+{% endif %}
+
+{% if let Some(p) = promotion %}
+<form class="admin-form" method="post" action="/admin/promotions/{{ p.id }}">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <label>Title <input type="text" name="title" required maxlength="120" value="{{ p.title }}"></label>
+  <label>Subtitle <input type="text" name="subtitle" maxlength="200" value="{{ p.subtitle }}"></label>
+  <label>CTA label <input type="text" name="cta_label" maxlength="40" value="{{ p.cta_label }}"></label>
+  <label>CTA link <input type="text" name="cta_href" maxlength="200" value="{{ p.cta_href }}"></label>
+  <label>Image URL <span class="hint">(optional, e.g. /img/db/3)</span> <input type="text" name="image_url" maxlength="200" value="{{ p.image_url }}"></label>
+  <label>Sort order <input type="number" name="sort_order" value="{{ p.sort_order }}"></label>
+  <label class="check"><input type="checkbox" name="active" {% if p.active %}checked{% endif %}> Active (show on home)</label>
+  <button class="btn btn-primary" type="submit">Save changes</button>
+</form>
+{% else %}
+<form class="admin-form" method="post" action="/admin/promotions">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <label>Title <input type="text" name="title" required maxlength="120"></label>
+  <label>Subtitle <input type="text" name="subtitle" maxlength="200"></label>
+  <label>CTA label <input type="text" name="cta_label" maxlength="40" placeholder="Order now"></label>
+  <label>CTA link <input type="text" name="cta_href" maxlength="200" placeholder="/category/signature-cakes"></label>
+  <label>Image URL <span class="hint">(optional)</span> <input type="text" name="image_url" maxlength="200"></label>
+  <label>Sort order <input type="number" name="sort_order" value="0"></label>
+  <label class="check"><input type="checkbox" name="active" checked> Active (show on home)</label>
+  <button class="btn btn-primary" type="submit">Create promotion</button>
+</form>
+{% endif %}
+{% endblock %}

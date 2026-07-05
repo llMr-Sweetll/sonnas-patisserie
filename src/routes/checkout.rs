@@ -215,6 +215,14 @@ async fn checkout_verify(
         if let Some(order) =
             db::mark_paid(&state.db, &form.order_number, &form.razorpay_payment_id).await?
         {
+            let _ = db::upsert_customer_order(
+                &state.db,
+                &order.phone,
+                &order.customer_name,
+                order.email.as_deref(),
+                order.total_inr,
+            )
+            .await;
             let items = db::order_items(&state.db, order.id).await?;
             whatsapp::notify_order_paid(&state, &order, &items).await;
         }

@@ -8,23 +8,38 @@
   <div class="stat-tile"><div class="stat-value">{{ orders_30d }}</div><div class="stat-label">Paid orders</div></div>
   <div class="stat-tile"><div class="stat-value">₹{{ aov }}</div><div class="stat-label">Average order</div></div>
   <div class="stat-tile"><div class="stat-value">{{ pending_count }}</div><div class="stat-label">To fulfil</div></div>
+  <div class="stat-tile"><div class="stat-value">{{ total_customers }}</div><div class="stat-label">Customers</div></div>
+  <div class="stat-tile"><div class="stat-value">{{ repeat_rate }}%</div><div class="stat-label">Repeat rate</div></div>
 </div>
 
 <div class="panel">
   <h2>Revenue by day</h2>
   <svg class="chart-svg" viewBox="0 0 640 168" role="img" aria-label="Daily revenue for the last 30 days">
     {% for b in revenue_bars %}
-    <rect x="{{ b.x }}" y="{{ b.y }}" width="{{ b.w }}" height="{{ b.h }}" rx="2" fill="#B97F14">
+    <rect x="{{ b.x }}" y="{{ b.y }}" width="{{ b.w }}" height="{{ b.h }}" rx="2" fill="#A8842F">
       <title>{{ b.label }} — {{ b.value }}</title>
     </rect>
     {% endfor %}
-    <line x1="0" y1="161" x2="640" y2="161" stroke="#d8d0c2" stroke-width="1"/>
+    <line x1="0" y1="161" x2="640" y2="161" stroke="#e6d6d8" stroke-width="1"/>
   </svg>
   <p class="chart-note">Hover a bar for the day's numbers. Paid orders only.</p>
 </div>
 
 <div class="panel">
-  <h2>Top products</h2>
+  <h2>New customers by day</h2>
+  <svg class="chart-svg" viewBox="0 0 640 168" role="img" aria-label="New customers per day, last 30 days">
+    {% for b in new_customer_bars %}
+    <rect x="{{ b.x }}" y="{{ b.y }}" width="{{ b.w }}" height="{{ b.h }}" rx="2" fill="#B14A5E">
+      <title>{{ b.label }} — {{ b.value }}</title>
+    </rect>
+    {% endfor %}
+    <line x1="0" y1="161" x2="640" y2="161" stroke="#e6d6d8" stroke-width="1"/>
+  </svg>
+  <p class="chart-note">{{ repeat_customers }} of {{ total_customers }} customers have ordered more than once.</p>
+</div>
+
+<div class="panel">
+  <h2>Top products (30 days)</h2>
   {% if top_products.is_empty() %}
   <p class="empty-note">No paid orders yet.</p>
   {% else %}
@@ -36,6 +51,46 @@
   </div>
   {% endfor %}
   {% endif %}
+</div>
+
+<div class="panel">
+  <h2>Revenue by category (30 days)</h2>
+  {% if category_bars.is_empty() %}
+  <p class="empty-note">No sales yet.</p>
+  {% else %}
+  {% for h in category_bars %}
+  <div class="hbar-row">
+    <span>{{ h.label }}</span>
+    <div class="hbar-track"><div class="hbar-fill" style="width: {{ h.pct }}%"></div></div>
+    <span class="hbar-value">{{ h.value }}</span>
+  </div>
+  {% endfor %}
+  {% endif %}
+</div>
+
+<div class="panel-2col">
+  <div class="panel">
+    <h2>Orders by channel</h2>
+    {% if source_split.is_empty() %}<p class="empty-note">No orders yet.</p>{% else %}
+    {% for h in source_split %}
+    <div class="hbar-row">
+      <span>{{ h.label }}</span>
+      <div class="hbar-track"><div class="hbar-fill" style="width: {{ h.pct }}%"></div></div>
+      <span class="hbar-value">{{ h.value }}</span>
+    </div>
+    {% endfor %}{% endif %}
+  </div>
+  <div class="panel">
+    <h2>Popular delivery slots</h2>
+    {% if slot_split.is_empty() %}<p class="empty-note">No orders yet.</p>{% else %}
+    {% for h in slot_split %}
+    <div class="hbar-row">
+      <span>{{ h.label }}</span>
+      <div class="hbar-track"><div class="hbar-fill" style="width: {{ h.pct }}%"></div></div>
+      <span class="hbar-value">{{ h.value }}</span>
+    </div>
+    {% endfor %}{% endif %}
+  </div>
 </div>
 
 <div class="panel">

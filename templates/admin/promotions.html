@@ -1,0 +1,27 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<h1 class="admin-title">Promotions</h1>
+<p style="margin-bottom:1rem;"><a class="btn btn-primary" href="/admin/promotions/new">Add promotion</a></p>
+<div class="panel">
+  {% if promotions.is_empty() %}
+  <p class="empty-note">No promotions yet. The first active one shows in the hero on the home page.</p>
+  {% else %}
+  <table class="admin-table">
+    <thead><tr><th>Title</th><th>Subtitle</th><th>CTA</th><th>Active</th><th>Order</th><th></th></tr></thead>
+    <tbody>
+      {% for p in promotions %}
+      <tr>
+        <td>{{ p.title }}</td>
+        <td>{{ p.subtitle }}</td>
+        <td>{{ p.cta_label }} → <span class="mono">{{ p.cta_href }}</span></td>
+        <td>{% if p.active %}✓{% else %}—{% endif %}</td>
+        <td>{{ p.sort_order }}</td>
+        <td><a href="/admin/promotions/{{ p.id }}">Edit</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+{% endblock %}

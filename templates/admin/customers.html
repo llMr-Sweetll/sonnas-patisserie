@@ -1,0 +1,28 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<h1 class="admin-title">Customers</h1>
+<div class="panel">
+  {% if customers.is_empty() %}
+  <p class="empty-note">No customers yet — they'll appear here after their first paid order or WhatsApp chat.</p>
+  {% else %}
+  <table class="admin-table">
+    <thead><tr><th>Name</th><th>Phone</th><th>Birthday</th><th>Orders</th><th>Spent</th><th>Marketing</th><th>Last order</th></tr></thead>
+    <tbody>
+      {% for c in customers %}
+      <tr>
+        <td>{% if let Some(n) = c.name %}{{ n }}{% else %}—{% endif %}</td>
+        <td class="mono">{{ c.phone }}</td>
+        <td>{% if c.birthday.is_some() %}🎂 {{ c.birthday_str() }}{% else %}—{% endif %}</td>
+        <td>{{ c.orders_count }}</td>
+        <td>₹{{ c.total_spent_inr }}</td>
+        <td>{% if c.marketing_opt_in %}opted in{% else %}—{% endif %}</td>
+        <td>{% if let Some(t) = c.last_order_at %}{{ t.format("%d %b %Y") }}{% else %}—{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+<p class="hint">Customers with a birthday and marketing opt-in get an automated WhatsApp greeting on the day (via the daily reminder job).</p>
+{% endblock %}

@@ -486,6 +486,8 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, .btn:focus-vi
 .stat-tile .stat-label { font-size: 0.76rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-soft); }
 .panel { background: #fff; border: 1px solid var(--line); border-radius: 6px; padding: 1.4rem; margin-bottom: 2rem; }
 .panel h2 { font-size: 1rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 1rem; }
+.panel-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+@media (max-width: 640px) { .panel-2col { grid-template-columns: 1fr; } }
 .chart-svg { width: 100%; height: auto; display: block; }
 .chart-note { font-size: 0.78rem; color: var(--ink-soft); margin-top: 0.5rem; }
 .hbar-row { display: grid; grid-template-columns: 200px 1fr 90px; gap: 0.8rem; align-items: center; padding: 0.35rem 0; font-size: 0.9rem; }
