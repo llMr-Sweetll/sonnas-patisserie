@@ -72,7 +72,33 @@ public/          stylesheet + payment page JS
 docs/            ARCHITECTURE.md · DEPLOYMENT.md
 ```
 
+## Observability & debugging
+
+- **Local**: structured logs via `tracing` — `RUST_LOG=debug cargo run` (defaults to
+  `info` + `debug` for app modules). SQL, webhook, WhatsApp and Claude failures all
+  log with context; webhook handlers log signature/amount rejections.
+- **Production**: the same log stream lands in **Vercel function logs**
+  (`vercel logs`); DB-side, use Supabase's query performance and auth logs.
+- **`GET /health`** — 200 only when the database answers; wire it to an uptime
+  monitor.
+- **Simulating the outside world**: signed webhook payloads for Razorpay and
+  WhatsApp can be crafted with `openssl dgst -sha256 -hmac <secret>` — examples in
+  docs/DEPLOYMENT.md; `cargo test` covers the signature verifiers themselves.
+
+## Privacy & compliance (DPDP Act 2023)
+
+Customer data is minimal by design (name/phone/address per order, no accounts, no
+trackers, payments never touch the server). `/privacy` and `/terms` are served by
+the app; checkout requires explicit consent; erasure and breach procedures are in
+[docs/COMPLIANCE.md](docs/COMPLIANCE.md).
+
 ## Documentation
 
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — how the pieces fit, key flows, security model
 - [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) — Vercel + Supabase + Razorpay + Meta setup, step by step
+- [docs/COMPLIANCE.md](docs/COMPLIANCE.md) — DPDP Act 2023 mapping, data rights, breach playbook
+
+## License
+
+[AGPL-3.0](LICENSE) — free to use, study, and modify; anyone who deploys a
+modified version (including as a hosted service) must publish their changes.

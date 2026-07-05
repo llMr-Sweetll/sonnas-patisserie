@@ -461,8 +461,8 @@ async fn finalize_order(
                 state,
                 phone,
                 &format!(
-                    "Your order *{}* is ready — total *₹{}* 🎂\n\nPay securely here to confirm:\n{url}\n\nWe'll send a confirmation the moment payment lands!",
-                    order.order_number, order.total_inr
+                    "Your order *{}* is ready — total *₹{}* 🎂\n\nPay securely here to confirm:\n{url}\n\nBy paying you agree we use your name, number and address to deliver this order ({}/privacy).\n\nWe'll send a confirmation the moment payment lands!",
+                    order.order_number, order.total_inr, state.cfg.base_url
                 ),
             )
             .await;

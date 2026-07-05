@@ -63,6 +63,20 @@ pub struct OrderTemplate {
 }
 
 #[derive(Template)]
+#[template(path = "privacy.html")]
+pub struct PrivacyTemplate {
+    pub categories: Vec<Category>,
+    pub cart_count: usize,
+}
+
+#[derive(Template)]
+#[template(path = "terms.html")]
+pub struct TermsTemplate {
+    pub categories: Vec<Category>,
+    pub cart_count: usize,
+}
+
+#[derive(Template)]
 #[template(path = "404.html")]
 pub struct NotFoundTemplate {
     pub categories: Vec<Category>,
@@ -191,6 +205,28 @@ async fn order_page(
     Ok(t.into_response())
 }
 
+async fn privacy(State(state): State<AppState>, jar: CookieJar) -> AppResult<PrivacyTemplate> {
+    Ok(PrivacyTemplate {
+        categories: db::list_categories(&state.db).await?,
+        cart_count: read_cart(&jar).len(),
+    })
+}
+
+async fn terms(State(state): State<AppState>, jar: CookieJar) -> AppResult<TermsTemplate> {
+    Ok(TermsTemplate {
+        categories: db::list_categories(&state.db).await?,
+        cart_count: read_cart(&jar).len(),
+    })
+}
+
+/// Liveness/readiness probe: 200 only when the database answers.
+async fn health(State(state): State<AppState>) -> impl IntoResponse {
+    match sqlx::query("select 1").execute(&state.db).await {
+        Ok(_) => (StatusCode::OK, "ok"),
+        Err(_) => (StatusCode::SERVICE_UNAVAILABLE, "db unreachable"),
+    }
+}
+
 pub fn router() -> Router<AppState> {
     Router::new()
         .route("/", get(home))
@@ -198,4 +234,7 @@ pub fn router() -> Router<AppState> {
         .route("/product/:slug", get(product))
         .route("/cart", get(cart_page))
         .route("/order/:number", get(order_page))
+        .route("/privacy", get(privacy))
+        .route("/terms", get(terms))
+        .route("/health", get(health))
 }

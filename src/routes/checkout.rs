@@ -71,9 +71,14 @@ pub struct CheckoutForm {
     pub delivery_date: NaiveDate,
     pub delivery_slot: String,
     pub notes: String,
+    #[serde(default)]
+    pub consent: Option<String>, // DPDP notice+consent checkbox: "on" when ticked
 }
 
 fn validate(form: &CheckoutForm) -> Result<(), &'static str> {
+    if form.consent.is_none() {
+        return Err("Please agree to the privacy notice so we can process your delivery details.");
+    }
     let name = form.customer_name.trim();
     if name.is_empty() || name.len() > 100 {
         return Err("Please enter your name.");

@@ -14,7 +14,9 @@ fn hmac_hex(secret: &str, data: &[u8]) -> String {
 #[test]
 fn tuesdays_are_not_deliverable() {
     // 2026-07-07 is a Tuesday, 2026-07-08 a Wednesday.
-    assert!(!is_deliverable(NaiveDate::from_ymd_opt(2026, 7, 7).unwrap()));
+    assert!(!is_deliverable(
+        NaiveDate::from_ymd_opt(2026, 7, 7).unwrap()
+    ));
     assert!(is_deliverable(NaiveDate::from_ymd_opt(2026, 7, 8).unwrap()));
 }
 
@@ -36,8 +38,18 @@ fn razorpay_webhook_signature_roundtrip() {
 #[test]
 fn razorpay_checkout_signature_roundtrip() {
     let sig = hmac_hex("keysecret", b"order_abc|pay_xyz");
-    assert!(verify_checkout_signature("keysecret", "order_abc", "pay_xyz", &sig));
-    assert!(!verify_checkout_signature("keysecret", "order_abc", "pay_other", &sig));
+    assert!(verify_checkout_signature(
+        "keysecret",
+        "order_abc",
+        "pay_xyz",
+        &sig
+    ));
+    assert!(!verify_checkout_signature(
+        "keysecret",
+        "order_abc",
+        "pay_other",
+        &sig
+    ));
 }
 
 #[test]

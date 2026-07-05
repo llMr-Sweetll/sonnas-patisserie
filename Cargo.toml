@@ -3,7 +3,7 @@ name = "sonnas-patisserie"
 version = "0.1.0"
 edition = "2021"
 description = "Sonna's Patisserie — cloud-kitchen cake shop: storefront, WhatsApp ordering bot, admin backend"
-license = "MIT"
+license = "AGPL-3.0-only"
 
 [dependencies]
 axum = { version = "0.7", features = ["multipart", "macros"] }
