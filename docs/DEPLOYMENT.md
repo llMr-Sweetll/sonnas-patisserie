@@ -3,12 +3,19 @@
 ## 1. Supabase
 
 1. Create a project (region `ap-south-1` is closest to Hubli).
-2. Grab the **transaction pooler** connection string (port **6543** — required for
-   serverless) → `DATABASE_URL`. Append `?sslmode=require` if not present.
-3. Storage → create a **public bucket named `products`** (admin image uploads go here).
-4. Project settings → API → copy `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`.
+2. Create a dedicated login role for the app (SQL editor; prefer setting the
+   password as a SCRAM verifier so plaintext never leaves your machine):
+   `create role sonnas_app with login password '…' connection limit 20;`
+   `grant usage, create on schema public to sonnas_app;`
+3. `DATABASE_URL` uses the **session pooler** (port **5432**) —
+   `postgres://sonnas_app.<ref>:<password>@aws-1-<region>.pooler.supabase.com:5432/postgres?sslmode=require`.
+   Transaction mode (6543) breaks sqlx's prepared statements; the direct
+   `db.<ref>.supabase.co` host is IPv6-only on the free tier.
+4. Storage → create a **public bucket named `products`** (admin image uploads go here).
+5. Project settings → API → copy `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`.
 
-Migrations and seed data run automatically the first time the app connects.
+Migrations, seed data, and RLS (enabled with zero policies, so the auto-generated
+PostgREST API exposes nothing) run automatically the first time the app connects.
 
 ## 2. Razorpay
 
@@ -61,8 +68,14 @@ vercel env add DATABASE_URL production
 vercel deploy --prod
 ```
 
-`vercel.json` builds `api/main.rs` with the `vercel-rust` community runtime and
-rewrites every path to it; files under `public/` are served by the CDN directly.
+The app uses Vercel's **official Rust runtime** (public beta, Fluid compute):
+`vercel_runtime = "2.4"` with the `axum` feature — `api/main.rs` is the only
+function, `vercel.json` rewrites every path to it, and static assets are
+compiled into the binary, so no static-dir configuration is needed. Do not use
+the deprecated `vercel-rust` community runtime.
+
+**Currently live:** https://sonnas-patisserie-seven.vercel.app (project
+`sonnas-patisserie`, Supabase project `qxvwqpyflwrisgncugka` in `ap-south-1`).
 
 ## 7. Post-deploy checklist
 
