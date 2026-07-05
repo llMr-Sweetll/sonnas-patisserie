@@ -1,0 +1,57 @@
+[package]
+name = "sonnas-patisserie"
+version = "0.1.0"
+edition = "2021"
+description = "Sonna's Patisserie — cloud-kitchen cake shop: storefront, WhatsApp ordering bot, admin backend"
+license = "MIT"
+
+[dependencies]
+axum = { version = "0.7", features = ["multipart", "macros"] }
+axum-extra = { version = "0.9", features = ["cookie"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "net"] }
+tower = { version = "0.5", features = ["util"] }
+tower-http = { version = "0.6", features = ["fs", "trace"] }
+askama = "0.12"
+askama_axum = "0.4"
+sqlx = { version = "0.8", default-features = false, features = [
+    "postgres", "runtime-tokio", "tls-rustls", "chrono", "migrate", "macros", "uuid",
+] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+chrono = { version = "0.4", features = ["serde"] }
+hmac = "0.12"
+sha2 = "0.10"
+hex = "0.4"
+subtle = "2"
+argon2 = "0.5"
+rand = "0.8"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+dotenvy = "0.15"
+urlencoding = "2"
+uuid = { version = "1", features = ["v4"] }
+vercel_runtime = "1"
+
+[[bin]]
+name = "sonnas-patisserie"
+path = "src/main.rs"
+
+[[bin]]
+name = "hash-password"
+path = "src/bin/hash_password.rs"
+
+[[bin]]
+name = "main"
+path = "api/main.rs"
+
+[lib]
+name = "sonnas_patisserie"
+path = "src/lib.rs"
+
+# ponytail: fully-optimized release per requirement — fat LTO + single codegen unit
+[profile.release]
+lto = true
+codegen-units = 1
+opt-level = 3
+strip = "symbols"
