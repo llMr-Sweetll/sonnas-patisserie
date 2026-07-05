@@ -6,13 +6,13 @@ description = "Sonna's Patisserie — cloud-kitchen cake shop: storefront, Whats
 license = "AGPL-3.0-only"
 
 [dependencies]
-axum = { version = "0.7", features = ["multipart", "macros"] }
-axum-extra = { version = "0.9", features = ["cookie"] }
+axum = { version = "0.8", features = ["multipart", "macros"] }
+axum-extra = { version = "0.10", features = ["cookie"] }
 tokio = { version = "1", features = ["macros", "rt-multi-thread", "net"] }
 tower = { version = "0.5", features = ["util"] }
-tower-http = { version = "0.6", features = ["fs", "trace"] }
-askama = { version = "0.12", features = ["with-axum"] }
-askama_axum = "0.4"
+tower-http = { version = "0.6", features = ["trace"] }
+hyper = { version = "1", features = ["full"] }
+askama = "0.12"
 sqlx = { version = "0.8", default-features = false, features = [
     "postgres", "runtime-tokio", "tls-rustls", "chrono", "derive", "uuid",
 ] }
@@ -31,8 +31,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 dotenvy = "0.15"
 urlencoding = "2"
 uuid = { version = "1", features = ["v4"] }
-vercel_runtime = "1"
-http-body-util = "0.1"
+vercel_runtime = { version = "2.4", features = ["axum"] }
 
 [[bin]]
 name = "sonnas-patisserie"

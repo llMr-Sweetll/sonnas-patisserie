@@ -83,6 +83,17 @@ pub struct NotFoundTemplate {
     pub cart_count: usize,
 }
 
+crate::impl_template_response!(
+    IndexTemplate,
+    CategoryTemplate,
+    ProductTemplate,
+    CartTemplate,
+    OrderTemplate,
+    PrivacyTemplate,
+    TermsTemplate,
+    NotFoundTemplate,
+);
+
 pub async fn not_found(state: &AppState, jar: &CookieJar) -> AppResult<axum::response::Response> {
     let categories = db::list_categories(&state.db).await?;
     let t = NotFoundTemplate {
@@ -230,10 +241,10 @@ async fn health(State(state): State<AppState>) -> impl IntoResponse {
 pub fn router() -> Router<AppState> {
     Router::new()
         .route("/", get(home))
-        .route("/category/:slug", get(category))
-        .route("/product/:slug", get(product))
+        .route("/category/{slug}", get(category))
+        .route("/product/{slug}", get(product))
         .route("/cart", get(cart_page))
-        .route("/order/:number", get(order_page))
+        .route("/order/{number}", get(order_page))
         .route("/privacy", get(privacy))
         .route("/terms", get(terms))
         .route("/health", get(health))

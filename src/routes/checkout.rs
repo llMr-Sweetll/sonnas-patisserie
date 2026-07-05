@@ -38,6 +38,8 @@ pub struct PaymentTemplate {
     pub cart_count: usize,
 }
 
+crate::impl_template_response!(CheckoutTemplate, PaymentTemplate);
+
 async fn checkout_form(
     State(state): State<AppState>,
     jar: CookieJar,

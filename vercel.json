@@ -1,9 +1,5 @@
 {
-  "functions": {
-    "api/main.rs": {
-      "runtime": "vercel-rust@4.0.9"
-    }
-  },
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
     { "source": "/(.*)", "destination": "/api/main" }
   ]

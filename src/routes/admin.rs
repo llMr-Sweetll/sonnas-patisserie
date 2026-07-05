@@ -80,6 +80,15 @@ pub struct ProductFormTemplate {
     pub error: Option<String>,
 }
 
+crate::impl_template_response!(
+    LoginTemplate,
+    DashboardTemplate,
+    OrdersTemplate,
+    OrderDetailTemplate,
+    ProductsTemplate,
+    ProductFormTemplate,
+);
+
 // --- Auth ---
 
 fn client_ip(headers: &HeaderMap) -> String {
@@ -497,12 +506,12 @@ pub fn router(state: AppState) -> Router<AppState> {
     let protected = Router::new()
         .route("/admin", get(dashboard))
         .route("/admin/orders", get(orders))
-        .route("/admin/orders/:id", get(order_detail))
-        .route("/admin/orders/:id/status", post(update_status))
+        .route("/admin/orders/{id}", get(order_detail))
+        .route("/admin/orders/{id}/status", post(update_status))
         .route("/admin/products", get(products).post(product_create))
         .route("/admin/products/new", get(product_new_form))
         .route(
-            "/admin/products/:id",
+            "/admin/products/{id}",
             get(product_edit_form).post(product_update),
         )
         .route("/admin/logout", post(logout))

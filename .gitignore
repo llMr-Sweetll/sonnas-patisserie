@@ -4,3 +4,4 @@
 !.env.example
 .vercel
 .DS_Store
+.env*

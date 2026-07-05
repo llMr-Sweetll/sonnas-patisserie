@@ -84,6 +84,7 @@ pub struct AppState {
 const MIGRATIONS: &[(&str, &str)] = &[
     ("0001_schema", include_str!("../migrations/0001_schema.sql")),
     ("0002_seed", include_str!("../migrations/0002_seed.sql")),
+    ("0003_rls", include_str!("../migrations/0003_rls.sql")),
 ];
 
 async fn run_migrations(pool: &PgPool) -> sqlx::Result<()> {
@@ -151,6 +152,47 @@ impl IntoResponse for AppError {
 
 pub type AppResult<T> = Result<T, AppError>;
 
+/// Implements axum's IntoResponse for Askama templates (askama_axum has no
+/// axum-0.8 release, and this is all it did anyway).
+#[macro_export]
+macro_rules! impl_template_response {
+    ($($t:ty),+ $(,)?) => {$(
+        impl axum::response::IntoResponse for $t {
+            fn into_response(self) -> axum::response::Response {
+                match askama::Template::render(&self) {
+                    Ok(html) => axum::response::Html(html).into_response(),
+                    Err(e) => $crate::AppError(e.to_string()).into_response(),
+                }
+            }
+        }
+    )+};
+}
+
+// Static assets are compiled into the binary so the same build serves them on
+// any host — no dependence on Vercel static-dir conventions.
+async fn style_css() -> impl IntoResponse {
+    (
+        [
+            (header::CONTENT_TYPE, "text/css; charset=utf-8"),
+            (header::CACHE_CONTROL, "public, max-age=3600"),
+        ],
+        include_str!("../public/style.css"),
+    )
+}
+
+async fn payment_js() -> impl IntoResponse {
+    (
+        [
+            (
+                header::CONTENT_TYPE,
+                "application/javascript; charset=utf-8",
+            ),
+            (header::CACHE_CONTROL, "public, max-age=3600"),
+        ],
+        include_str!("../public/payment.js"),
+    )
+}
+
 async fn security_headers(req: axum::extract::Request, next: Next) -> Response {
     let mut res = next.run(req).await;
     let h = res.headers_mut();
@@ -182,6 +224,8 @@ pub fn build_router(state: AppState) -> Router {
         .merge(routes::webhook::router())
         .merge(routes::admin::router(state.clone()))
         .merge(cart::router())
+        .route("/public/style.css", axum::routing::get(style_css))
+        .route("/public/payment.js", axum::routing::get(payment_js))
         .layer(middleware::from_fn(security_headers))
         .with_state(state)
 }

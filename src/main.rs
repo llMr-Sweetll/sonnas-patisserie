@@ -1,4 +1,3 @@
-use tower_http::services::ServeDir;
 use tower_http::trace::TraceLayer;
 
 use sonnas_patisserie::{build_router, build_state, connect_db};
@@ -15,9 +14,7 @@ async fn main() {
 
     let db = connect_db().await;
     let state = build_state(db);
-    let app = build_router(state)
-        .nest_service("/public", ServeDir::new("public"))
-        .layer(TraceLayer::new_for_http());
+    let app = build_router(state).layer(TraceLayer::new_for_http());
 
     let port: u16 = std::env::var("PORT")
         .ok()
