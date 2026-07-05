@@ -14,7 +14,7 @@
   <div class="order-detail">
     {% for i in items %}
     <div class="summary-line">
-      <span>{{ i.product_name }} × {{ i.qty }}{% if i.eggless %} <span class="badge badge-pista">eggless</span>{% endif %}
+      <span>{{ i.product_name }} × {{ i.qty }}{% if i.eggless %} <span class="badge badge-eggless">eggless</span>{% endif %}
         {% if let Some(c) = i.customization %}<br><span class="cart-custom">✍️ “{{ c }}”</span>{% endif %}
       </span>
       <span>₹{{ i.line_total() }}</span>

@@ -28,7 +28,7 @@
   <label class="check"><input type="checkbox" name="is_eggless_available" {% if p.is_eggless_available %}checked{% endif %}> Eggless available</label>
   <label class="check"><input type="checkbox" name="is_available" {% if p.is_available %}checked{% endif %}> Available for order</label>
   <label class="check"><input type="checkbox" name="is_featured" {% if p.is_featured %}checked{% endif %}> Featured on the home page</label>
-  <button class="btn btn-saffron" type="submit">Save changes</button>
+  <button class="btn btn-primary" type="submit">Save changes</button>
 </form>
 {% else %}
 <form class="admin-form" method="post" action="/admin/products" enctype="multipart/form-data">
@@ -48,7 +48,7 @@
   <label class="check"><input type="checkbox" name="is_eggless_available" checked> Eggless available</label>
   <label class="check"><input type="checkbox" name="is_available" checked> Available for order</label>
   <label class="check"><input type="checkbox" name="is_featured"> Featured on the home page</label>
-  <button class="btn btn-saffron" type="submit">Create product</button>
+  <button class="btn btn-primary" type="submit">Create product</button>
 </form>
 {% endif %}
 {% endblock %}

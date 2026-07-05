@@ -4,7 +4,12 @@
 
 {% block content %}
 <section class="section">
-  <h1 class="page-title">{{ category.name }}</h1>
+  <div class="section-head">
+    <div>
+      <span class="section-kicker">Sonna's Patisserie</span>
+      <h1 class="page-title">{{ category.name }}</h1>
+    </div>
+  </div>
   {% if products.is_empty() %}
   <p class="empty-note">Nothing here right now — new bakes land often, check back soon.</p>
   {% else %}

@@ -79,6 +79,14 @@ impl Product {
     pub fn tile_variant(&self) -> i64 {
         self.id % 4
     }
+
+    /// First sentence of the description, for compact product cards.
+    pub fn short_desc(&self) -> String {
+        match self.description.split_once(". ") {
+            Some((first, _)) => format!("{first}."),
+            None => self.description.clone(),
+        }
+    }
 }
 
 impl Order {

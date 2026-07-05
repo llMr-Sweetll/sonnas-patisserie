@@ -1,9 +1,22 @@
 <a class="product-card" href="/product/{{ p.slug }}">
-  {% if p.image_url.is_empty() %}
-  <div class="tile tile-{{ p.tile_variant() }}"><span>{{ p.initial() }}</span></div>
-  {% else %}
-  <img src="{{ p.image_url }}" alt="{{ p.name }}">
-  {% endif %}
-  <h3>{{ p.name }}</h3>
-  <p class="price">₹{{ p.price_inr }}</p>
+  <div class="card-media">
+    {% if p.image_url.is_empty() %}
+    <div class="tile">
+      <svg class="monogram" viewBox="0 0 48 72" fill="none" stroke="currentColor" stroke-width="4" aria-hidden="true">
+        <path d="M24 36 C10 26 10 8 24 10 C38 12 38 30 24 36 C10 42 10 60 24 62 C38 64 38 46 24 36Z"/>
+      </svg>
+    </div>
+    {% else %}
+    <img src="{{ p.image_url }}" alt="{{ p.name }}" loading="lazy">
+    {% endif %}
+    {% if p.is_featured %}<span class="card-tag">Signature</span>{% endif %}
+  </div>
+  <div class="card-body">
+    <h3>{{ p.name }}</h3>
+    <p class="card-desc">{{ p.short_desc() }}</p>
+    <div class="card-foot">
+      <span class="price">{{ p.price_inr }}</span>
+      <span class="card-cta">View →</span>
+    </div>
+  </div>
 </a>

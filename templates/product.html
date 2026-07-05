@@ -6,14 +6,22 @@
 <section class="section product-page">
   <div class="product-media">
     {% if product.image_url.is_empty() %}
-    <div class="tile tile-lg tile-{{ product.tile_variant() }}"><span>{{ product.initial() }}</span></div>
+    <div class="tile">
+      <svg class="monogram" viewBox="0 0 48 72" fill="none" stroke="currentColor" stroke-width="4" aria-hidden="true">
+        <path d="M24 36 C10 26 10 8 24 10 C38 12 38 30 24 36 C10 42 10 60 24 62 C38 64 38 46 24 36Z"/>
+      </svg>
+    </div>
     {% else %}
     <img src="{{ product.image_url }}" alt="{{ product.name }}">
     {% endif %}
   </div>
   <div class="product-info">
     <h1>{{ product.name }}</h1>
-    <p class="price price-lg">₹{{ product.price_inr }}</p>
+    <div class="product-meta">
+      <span class="price price-lg">{{ product.price_inr }}</span>
+      <span class="veg-dot" title="100% vegetarian" aria-label="Vegetarian"></span>
+      {% if product.is_eggless_available %}<span class="badge badge-eggless">Eggless available</span>{% endif %}
+    </div>
     <p class="product-desc">{{ product.description }}</p>
 
     {% if product.is_available %}
@@ -27,16 +35,16 @@
         <input type="checkbox" name="eggless"> Make it eggless
       </label>
       {% endif %}
-      <label>Message on the cake <span class="hint">(optional)</span>
+      <label>Message on the cake <span class="field-hint">(optional)</span>
         <input type="text" name="customization" maxlength="200" placeholder="e.g. Happy Birthday Ananya">
       </label>
-      <button class="btn btn-saffron" type="submit">Add to cart</button>
+      <button class="btn btn-primary btn-wide" type="submit">Add to cart</button>
     </form>
     {% else %}
-    <p class="soldout">Sold out today — it'll be back!</p>
+    <p class="soldout">Sold out today — it'll be back soon!</p>
     {% endif %}
 
-    <p class="trust-line">100% vegetarian · baked fresh on the day of delivery</p>
+    <p class="hint" style="margin-top:1.5rem;">Baked fresh on the day of delivery · delivered within Hubli, 2pm – 10pm · closed Tuesdays.</p>
   </div>
 </section>
 {% endblock %}

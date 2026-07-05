@@ -5,11 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}Sonna's Patisserie — Artisanal cakes & desserts, Hubli{% endblock %}</title>
   <meta name="description" content="100% vegetarian artisanal cakes and desserts, baked fresh in Hubli and delivered to your door. Order online or on WhatsApp.">
+  <link rel="preload" as="image" href="/img/hero.jpg">
   <link rel="stylesheet" href="/public/style.css">
 </head>
 <body>
   <header class="site-header">
-    <a class="brand" href="/">Sonna's<span class="brand-tail">Patisserie</span></a>
+    <a class="brand" href="/">
+      <svg class="monogram" viewBox="0 0 48 72" fill="none" stroke="currentColor" stroke-width="4" aria-hidden="true">
+        <path d="M24 36 C10 26 10 8 24 10 C38 12 38 30 24 36 C10 42 10 60 24 62 C38 64 38 46 24 36Z"/>
+      </svg>
+      Sonna's<span class="brand-tail">Patisserie</span>
+    </a>
     <nav class="site-nav">
       {% for c in categories %}
       <a href="/category/{{ c.slug }}">{{ c.name }}</a>
@@ -24,23 +30,33 @@
 
   <footer class="site-footer">
     <div class="footer-grid">
-      <div>
-        <p class="footer-brand">Sonna's Patisserie</p>
-        <p>100% vegetarian · baked fresh every day</p>
+      <div class="footer-col">
+        <p class="footer-brand">
+          <svg class="monogram" viewBox="0 0 48 72" fill="none" stroke="currentColor" stroke-width="4" aria-hidden="true">
+            <path d="M24 36 C10 26 10 8 24 10 C38 12 38 30 24 36 C10 42 10 60 24 62 C38 64 38 46 24 36Z"/>
+          </svg>
+          Sonna's
+        </p>
+        <p style="color:#b39d84;font-size:0.88rem;max-width:26ch;">Artisanal, 100% vegetarian cakes & desserts — baked fresh every day in Hubli.</p>
       </div>
-      <div>
+      <div class="footer-col">
+        <h4>Visit & delivery</h4>
         <p>Akshay Colony, Vidya Nagar, Hubli</p>
-        <p>Delivery 2pm – 10pm · closed Tuesdays</p>
+        <p>Delivery 2pm – 10pm</p>
+        <p>Closed Tuesdays</p>
       </div>
-      <div>
-        <p><a href="https://wa.me/919113231424">WhatsApp +91 91132 31424</a></p>
-        <p><a href="https://www.instagram.com/sonnas___/">Instagram @sonnas___</a></p>
+      <div class="footer-col">
+        <h4>Order & say hello</h4>
+        <a href="https://wa.me/919113231424">WhatsApp +91 91132 31424</a>
+        <a href="https://www.instagram.com/sonnas___/">Instagram @sonnas___</a>
       </div>
-      <div>
-        <p><a href="/privacy">Privacy</a></p>
-        <p><a href="/terms">Terms, delivery &amp; refunds</a></p>
+      <div class="footer-col">
+        <h4>Good to know</h4>
+        <a href="/privacy">Privacy</a>
+        <a href="/terms">Terms, delivery & refunds</a>
       </div>
     </div>
+    <div class="footer-bottom">© Sonna's Patisserie, Hubli · Made fresh, delivered warm.</div>
   </footer>
 </body>
 </html>

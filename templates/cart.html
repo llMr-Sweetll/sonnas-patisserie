@@ -7,39 +7,48 @@
   <h1 class="page-title">Your cart</h1>
 
   {% if lines.is_empty() %}
-  <p class="empty-note">Your cart is empty. The <a href="/">menu</a> is a good place to fix that.</p>
+  <p class="empty-note">Your cart is empty. The <a href="/" style="color:var(--terracotta);">menu</a> is a good place to fix that.</p>
   {% else %}
   <div class="cart-lines">
     {% for v in lines %}
     <div class="cart-line">
+      {% if v.product.image_url.is_empty() %}
+      <div class="cart-thumb tile"></div>
+      {% else %}
+      <img class="cart-thumb" src="{{ v.product.image_url }}" alt="{{ v.product.name }}" loading="lazy">
+      {% endif %}
       <div class="cart-line-info">
         <a class="cart-line-name" href="/product/{{ v.product.slug }}">{{ v.product.name }}</a>
-        {% if v.line.eggless %}<span class="badge badge-pista">eggless</span>{% endif %}
+        {% if v.line.eggless %} <span class="badge badge-eggless">eggless</span>{% endif %}
         {% if let Some(c) = v.line.customization %}
         <p class="cart-custom">✍️ “{{ c }}”</p>
         {% endif %}
+        <div class="cart-line-controls">
+          <form class="qty-form" method="post" action="/cart/update">
+            <input type="hidden" name="index" value="{{ v.index }}">
+            <input type="number" name="qty" value="{{ v.line.qty }}" min="1" max="20" aria-label="Quantity">
+            <button class="btn-mini" type="submit">Update</button>
+          </form>
+          <form method="post" action="/cart/remove">
+            <input type="hidden" name="index" value="{{ v.index }}">
+            <button class="btn-mini btn-remove" type="submit" aria-label="Remove {{ v.product.name }}">Remove</button>
+          </form>
+        </div>
       </div>
-      <form class="qty-form" method="post" action="/cart/update">
-        <input type="hidden" name="index" value="{{ v.index }}">
-        <input type="number" name="qty" value="{{ v.line.qty }}" min="1" max="20" aria-label="Quantity">
-        <button class="btn-mini" type="submit">Update</button>
-      </form>
-      <p class="cart-line-total">₹{{ v.line_total }}</p>
-      <form method="post" action="/cart/remove">
-        <input type="hidden" name="index" value="{{ v.index }}">
-        <button class="btn-mini btn-remove" type="submit" aria-label="Remove {{ v.product.name }}">Remove</button>
-      </form>
+      <div class="cart-line-right">
+        <span class="cart-line-total price">{{ v.line_total }}</span>
+      </div>
     </div>
     {% endfor %}
   </div>
 
   <div class="cart-summary">
-    <p class="cart-subtotal">Subtotal <strong>₹{{ subtotal }}</strong></p>
+    <div class="cart-subtotal"><span>Subtotal</span><strong>₹{{ subtotal }}</strong></div>
     <div class="cart-actions">
-      <a class="btn btn-saffron" href="/checkout">Checkout</a>
-      <a class="btn btn-outline" href="{{ wa_link }}">Order on WhatsApp instead</a>
+      <a class="btn btn-primary btn-wide" href="/checkout">Checkout</a>
+      <a class="btn btn-wa btn-wide" href="{{ wa_link }}">Order on WhatsApp instead</a>
     </div>
-    <p class="hint">Delivery within Hubli, 2pm – 10pm. We're closed on Tuesdays.</p>
+    <p class="hint" style="margin-top:1rem;">Delivery within Hubli, 2pm – 10pm. We're closed on Tuesdays.</p>
   </div>
   {% endif %}
 </section>

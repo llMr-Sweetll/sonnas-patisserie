@@ -85,6 +85,10 @@ const MIGRATIONS: &[(&str, &str)] = &[
     ("0001_schema", include_str!("../migrations/0001_schema.sql")),
     ("0002_seed", include_str!("../migrations/0002_seed.sql")),
     ("0003_rls", include_str!("../migrations/0003_rls.sql")),
+    (
+        "0004_real_photos",
+        include_str!("../migrations/0004_real_photos.sql"),
+    ),
 ];
 
 async fn run_migrations(pool: &PgPool) -> sqlx::Result<()> {
@@ -216,6 +220,49 @@ async fn payment_js() -> impl IntoResponse {
     )
 }
 
+/// Product photography, embedded into the binary so it ships with the app on any
+/// host. Add a new file here when it lands in public/img/.
+macro_rules! embedded_images {
+    ($($name:literal),+ $(,)?) => {
+        fn image_bytes(name: &str) -> Option<&'static [u8]> {
+            match name {
+                $($name => Some(include_bytes!(concat!("../public/img/", $name))),)+
+                _ => None,
+            }
+        }
+    };
+}
+embedded_images!(
+    "hero.jpg",
+    "about.jpg",
+    "almond-tea-cake.jpg",
+    "belgian-chocolate-truffle.jpg",
+    "biscoff-cheesecake.jpg",
+    "blueberry-cheesecake.jpg",
+    "chocolate-caramel-almond-brittle.jpg",
+    "classic-baked-cheesecake.jpg",
+    "dark-chocolate-mousse.jpg",
+    "lemon-cheese-mousse.jpg",
+    "nutella-cheesecake.jpg",
+    "punjabi-chocolate-classic.jpg",
+);
+
+async fn product_image(
+    axum::extract::Path(name): axum::extract::Path<String>,
+) -> axum::response::Response {
+    match image_bytes(&name) {
+        Some(bytes) => (
+            [
+                (header::CONTENT_TYPE, "image/jpeg"),
+                (header::CACHE_CONTROL, "public, max-age=604800, immutable"),
+            ],
+            bytes,
+        )
+            .into_response(),
+        None => axum::http::StatusCode::NOT_FOUND.into_response(),
+    }
+}
+
 async fn security_headers(req: axum::extract::Request, next: Next) -> Response {
     let mut res = next.run(req).await;
     let h = res.headers_mut();
@@ -249,6 +296,7 @@ pub fn build_router(state: AppState) -> Router {
         .merge(cart::router())
         .route("/public/style.css", axum::routing::get(style_css))
         .route("/public/payment.js", axum::routing::get(payment_js))
+        .route("/img/{name}", axum::routing::get(product_image))
         .layer(middleware::from_fn(security_headers))
         .with_state(state)
 }

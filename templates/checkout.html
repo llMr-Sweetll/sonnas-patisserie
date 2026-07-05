@@ -41,18 +41,18 @@
         <textarea name="notes" maxlength="500" rows="2"></textarea>
       </label>
       <p class="hint">We deliver 2pm – 10pm and are closed on Tuesdays.</p>
-      <label class="check">
+      <label class="consent-check">
         <input type="checkbox" name="consent" required>
-        <span>I agree that my name, phone, and address are used to prepare and deliver this order and to send me order updates on WhatsApp, as described in the <a href="/privacy">privacy notice</a>.</span>
+        <span>I agree that my name, phone, and address are used to prepare and deliver this order and to send me order updates on WhatsApp, as described in the <a href="/privacy" style="color:var(--terracotta);">privacy notice</a>.</span>
       </label>
-      <button class="btn btn-saffron btn-wide" type="submit">Continue to payment</button>
+      <button class="btn btn-primary btn-wide" type="submit">Continue to payment</button>
     </form>
 
     <aside class="order-summary">
       <h2>Order summary</h2>
       {% for v in lines %}
       <div class="summary-line">
-        <span>{{ v.product.name }} × {{ v.line.qty }}{% if v.line.eggless %} <span class="badge badge-pista">eggless</span>{% endif %}</span>
+        <span>{{ v.product.name }} × {{ v.line.qty }}{% if v.line.eggless %} <span class="badge badge-eggless">eggless</span>{% endif %}</span>
         <span>₹{{ v.line_total }}</span>
       </div>
       {% endfor %}

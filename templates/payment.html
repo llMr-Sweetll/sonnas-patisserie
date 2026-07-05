@@ -5,24 +5,27 @@
 {% block content %}
 <section class="section narrow pay-page">
   <h1 class="page-title">Almost there</h1>
-  <p>Order <span class="mono">{{ order.order_number }}</span> · total <strong>₹{{ order.total_inr }}</strong></p>
-  <p class="hint">A secure Razorpay window will open. Your order is confirmed once payment completes.</p>
+  <div class="pay-card">
+    <p>Order <span class="mono">{{ order.order_number }}</span></p>
+    <p style="font-size:1.6rem;font-family:var(--display);font-weight:600;margin:0.5rem 0 1rem;">₹{{ order.total_inr }}</p>
+    <p class="hint" style="margin-bottom:1.4rem;">A secure Razorpay window will open. Your order is confirmed once payment completes.</p>
 
-  <form id="pay-data"
-        method="post" action="/checkout/verify"
-        data-key="{{ key_id }}"
-        data-rzp-order="{{ rzp_order_id }}"
-        data-amount="{{ amount_paise }}"
-        data-name="{{ order.customer_name }}"
-        data-phone="{{ order.phone }}"
-        data-order-number="{{ order.order_number }}">
-    <input type="hidden" name="csrf" value="{{ csrf }}">
-    <input type="hidden" name="order_number" value="{{ order.order_number }}">
-    <input type="hidden" name="razorpay_order_id" value="{{ rzp_order_id }}">
-    <input type="hidden" name="razorpay_payment_id" value="">
-    <input type="hidden" name="razorpay_signature" value="">
-    <button class="btn btn-saffron btn-wide" type="button" id="pay-btn">Pay ₹{{ order.total_inr }}</button>
-  </form>
+    <form id="pay-data"
+          method="post" action="/checkout/verify"
+          data-key="{{ key_id }}"
+          data-rzp-order="{{ rzp_order_id }}"
+          data-amount="{{ amount_paise }}"
+          data-name="{{ order.customer_name }}"
+          data-phone="{{ order.phone }}"
+          data-order-number="{{ order.order_number }}">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <input type="hidden" name="order_number" value="{{ order.order_number }}">
+      <input type="hidden" name="razorpay_order_id" value="{{ rzp_order_id }}">
+      <input type="hidden" name="razorpay_payment_id" value="">
+      <input type="hidden" name="razorpay_signature" value="">
+      <button class="btn btn-primary btn-wide" type="button" id="pay-btn">Pay ₹{{ order.total_inr }}</button>
+    </form>
+  </div>
 </section>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script src="/public/payment.js"></script>
