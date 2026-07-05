@@ -8,6 +8,15 @@ use vercel_runtime::Error;
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
+    // Structured logs → Vercel function logs (no ANSI noise).
+    tracing_subscriber::fmt()
+        .with_ansi(false)
+        .with_env_filter(
+            tracing_subscriber::EnvFilter::try_from_default_env()
+                .unwrap_or_else(|_| "info,sonnas_patisserie=debug".into()),
+        )
+        .init();
+
     let db = sonnas_patisserie::connect_db().await;
     let router = sonnas_patisserie::build_router(sonnas_patisserie::build_state(db));
     let app = ServiceBuilder::new()

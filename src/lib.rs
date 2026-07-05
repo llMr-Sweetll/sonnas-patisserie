@@ -113,13 +113,36 @@ async fn run_migrations(pool: &PgPool) -> sqlx::Result<()> {
 
 pub async fn connect_db() -> PgPool {
     let url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    let pool = PgPoolOptions::new()
+    let opts = PgPoolOptions::new()
         .max_connections(5)
-        .connect(&url)
-        .await
-        .expect("failed to connect to Postgres");
-    run_migrations(&pool).await.expect("migrations failed");
-    pool
+        .min_connections(0)
+        .acquire_timeout(std::time::Duration::from_secs(15))
+        // The Supabase pooler reaps idle sessions; validate before reuse so a
+        // long-idle Fluid instance doesn't hand out dead connections.
+        .test_before_acquire(true)
+        .idle_timeout(std::time::Duration::from_secs(10 * 60))
+        .max_lifetime(std::time::Duration::from_secs(25 * 60));
+
+    // Cold starts must survive transient pooler hiccups — retry before panicking.
+    let mut attempt = 0u32;
+    loop {
+        attempt += 1;
+        let connected = match opts.clone().connect(&url).await {
+            Ok(pool) => match run_migrations(&pool).await {
+                Ok(()) => Ok(pool),
+                Err(e) => Err(e),
+            },
+            Err(e) => Err(e),
+        };
+        match connected {
+            Ok(pool) => return pool,
+            Err(e) if attempt < 3 => {
+                tracing::warn!(error = %e, attempt, "db init failed; retrying");
+                tokio::time::sleep(std::time::Duration::from_secs(attempt as u64)).await;
+            }
+            Err(e) => panic!("database initialisation failed after {attempt} attempts: {e}"),
+        }
+    }
 }
 
 pub fn build_state(db: PgPool) -> AppState {
