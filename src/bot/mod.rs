@@ -7,6 +7,7 @@
 //! → ask_date/slot).
 
 pub mod claude;
+pub mod faq;
 
 use chrono::{Datelike, Duration, Local, NaiveDate};
 use serde_json::{json, Value};
@@ -208,7 +209,34 @@ async fn handle_text(
                 send_welcome(state, phone).await;
                 return Ok("start".into());
             }
-            // Free text → Claude with catalog/cart tools.
+            // If they volunteered a birthday, remember it (opt-in via volunteering).
+            if let Some(bd) = faq::detect_birthday(trimmed) {
+                let name = ctx["customer_name"].as_str();
+                db::set_customer_birthday(&state.db, phone, name, bd).await?;
+                send_text(
+                    state,
+                    phone,
+                    &format!(
+                        "Noted — I'll remember your birthday is *{}* 🎂 We'll have something sweet for you when it comes around!",
+                        bd.format("%d %B")
+                    ),
+                )
+                .await;
+                return Ok("start".into());
+            }
+            // Deterministic FAQ answers work with zero AI keys.
+            if let Some(answer) = faq::match_faq(trimmed) {
+                send_buttons(
+                    state,
+                    phone,
+                    &answer,
+                    &[("menu", "Browse menu 🍰"), ("cart", "My cart 🛒")],
+                )
+                .await;
+                return Ok("start".into());
+            }
+            // Anything else → Claude with catalog/cart tools (falls back to the
+            // guided menu when no ANTHROPIC_API_KEY is configured).
             claude::handle_free_text(state, phone, trimmed, cart, ctx).await
         }
     }
