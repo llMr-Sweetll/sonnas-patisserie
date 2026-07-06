@@ -11,8 +11,10 @@
    `postgres://sonnas_app.<ref>:<password>@aws-1-<region>.pooler.supabase.com:5432/postgres?sslmode=require`.
    Transaction mode (6543) breaks sqlx's prepared statements; the direct
    `db.<ref>.supabase.co` host is IPv6-only on the free tier.
-4. Storage → create a **public bucket named `products`** (admin image uploads go here).
-5. Project settings → API → copy `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`.
+4. Product images are stored in Postgres (`product_images.bytes`), so no Supabase
+   Storage bucket is required for the current app.
+5. `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are optional placeholders for
+   future Supabase HTTP API use; the current app talks directly to Postgres.
 
 Migrations, seed data, and RLS (enabled with zero policies, so the auto-generated
 PostgREST API exposes nothing) run automatically the first time the app connects.
@@ -24,6 +26,10 @@ PostgREST API exposes nothing) run automatically the first time the app connects
 2. After the first deploy: Dashboard → Webhooks → add
    `https://<your-domain>/webhooks/razorpay`, subscribe to **payment.captured**
    and **payment_link.paid**, set a secret → `RAZORPAY_WEBHOOK_SECRET`.
+
+Until `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET` are set, the web checkout page
+does not create a pending order; it sends the customer's cart to WhatsApp
+instead. This keeps the storefront usable during the WhatsApp-only launch phase.
 
 ## 3. Meta WhatsApp Cloud API
 
@@ -85,6 +91,8 @@ the deprecated `vercel-rust` community runtime.
 ## 7. Post-deploy checklist
 
 - [ ] `https://<domain>/` renders the storefront with seeded products
+- [ ] With Razorpay keys absent, `/checkout` shows the WhatsApp fallback instead
+      of attempting online payment
 - [ ] Razorpay webhook registered and its **test** payment flips an order to `paid`
 - [ ] Meta webhook verified (green check in the app dashboard)
 - [ ] Send "hi" to the WhatsApp number → welcome + menu buttons arrive

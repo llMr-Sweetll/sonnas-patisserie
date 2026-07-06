@@ -41,6 +41,10 @@ fn env(key: &str) -> String {
 }
 
 impl Config {
+    pub fn razorpay_checkout_ready(&self) -> bool {
+        !self.razorpay_key_id.is_empty() && !self.razorpay_key_secret.is_empty()
+    }
+
     pub fn from_env() -> Self {
         let session_secret = env("SESSION_SECRET");
         if session_secret.len() < 32 {

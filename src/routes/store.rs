@@ -212,23 +212,26 @@ pub async fn build_cart_view(
     Ok((views, subtotal))
 }
 
-async fn cart_page(State(state): State<AppState>, jar: CookieJar) -> AppResult<CartTemplate> {
-    let cart = read_cart(&jar);
-    let (lines, subtotal) = build_cart_view(&state, &cart).await?;
-    // "Order on WhatsApp" deep link with the cart pre-filled.
+pub fn whatsapp_cart_link(owner_whatsapp_number: &str, lines: &[CartView]) -> String {
     let mut text = String::from("Hi Sonna's Patisserie! I'd like to order:\n");
-    for v in &lines {
+    for v in lines {
         text.push_str(&format!("• {} × {}", v.product.name, v.line.qty));
         if v.line.eggless {
             text.push_str(" (eggless)");
         }
         text.push('\n');
     }
-    let wa_link = format!(
+    format!(
         "https://wa.me/{}?text={}",
-        state.cfg.owner_whatsapp_number,
+        owner_whatsapp_number,
         urlencoding::encode(&text)
-    );
+    )
+}
+
+async fn cart_page(State(state): State<AppState>, jar: CookieJar) -> AppResult<CartTemplate> {
+    let cart = read_cart(&jar);
+    let (lines, subtotal) = build_cart_view(&state, &cart).await?;
+    let wa_link = whatsapp_cart_link(&state.cfg.owner_whatsapp_number, &lines);
     Ok(CartTemplate {
         categories: db::list_categories(&state.db).await?,
         lines,

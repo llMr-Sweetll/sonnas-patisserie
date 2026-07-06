@@ -39,7 +39,7 @@ body {
 
 a { color: inherit; }
 img { max-width: 100%; display: block; }
-h1, h2, h3 { font-family: var(--display); font-weight: 600; line-height: 1.1; letter-spacing: -0.01em; }
+h1, h2, h3 { font-family: var(--display); font-weight: 600; line-height: 1.1; letter-spacing: 0; }
 
 /* --- Brand monogram --- */
 .monogram { width: 1em; height: 1.4em; display: inline-block; vertical-align: middle; color: var(--rose); }
@@ -134,7 +134,7 @@ h1, h2, h3 { font-family: var(--display); font-weight: 600; line-height: 1.1; le
   font-size: clamp(2.4rem, 5.5vw, 4.4rem);
   font-weight: 600;
   color: var(--ink);
-  letter-spacing: -0.015em;
+  letter-spacing: 0;
 }
 .hero h1 em { font-style: italic; color: var(--rose); }
 .hero h1 em::after {
@@ -428,6 +428,9 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, .btn:focus-vi
 @media (max-width: 760px) { .checkout-grid { grid-template-columns: 1fr; } }
 .checkout-form { display: grid; gap: 1.1rem; }
 .checkout-form label { display: grid; gap: 0.35rem; font-size: 0.9rem; font-weight: 500; }
+.checkout-unavailable { background: #fff; border: 1px solid var(--line); border-radius: 6px; padding: 1.4rem; }
+.checkout-unavailable h2 { font-size: 1.4rem; }
+.checkout-unavailable p { color: var(--ink-soft); }
 .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 @media (max-width: 480px) { .field-row { grid-template-columns: 1fr; } }
 .order-summary { background: #fff; border: 1px solid var(--line); border-radius: 6px; padding: 1.4rem; position: sticky; top: 90px; }
@@ -512,8 +515,15 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, .btn:focus-vi
   .site-header { gap: 0.6rem 1rem; }
   /* Break the nav onto its own full-width row and let it scroll if needed,
      so the header can never force horizontal overflow. */
-  .site-nav { order: 3; flex: 0 0 100%; width: 100%; gap: 0.6rem 1rem; font-size: 0.76rem; overflow-x: auto; }
+  .site-nav { order: 3; flex: 0 0 100%; width: 100%; gap: 0.6rem 1rem; font-size: 0.76rem; overflow-x: auto; flex-wrap: nowrap; white-space: nowrap; padding-bottom: 0.15rem; -webkit-overflow-scrolling: touch; }
+  .site-nav a { flex: 0 0 auto; }
   .cart-link { margin-left: auto; }
+}
+
+@media (max-width: 720px) {
+  .admin-header { flex-wrap: wrap; gap: 0.7rem 1rem; }
+  .admin-header nav { order: 3; flex: 0 0 100%; width: 100%; overflow-x: auto; flex-wrap: nowrap; white-space: nowrap; padding-bottom: 0.2rem; -webkit-overflow-scrolling: touch; }
+  .admin-header nav a { flex: 0 0 auto; }
 }
 
 @media (prefers-reduced-motion: reduce) {
