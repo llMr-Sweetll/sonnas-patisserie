@@ -11,6 +11,14 @@
   {% endif %}
 
   <div class="checkout-grid">
+    {% if !payment_ready %}
+    <div class="checkout-form checkout-unavailable">
+      <h2>Online payment is almost ready</h2>
+      <p>Online checkout is being connected for this launch. Your cart is ready, so send it to us on WhatsApp and we'll take the order there.</p>
+      <a class="btn btn-wa btn-wide" href="{{ wa_link }}">Order on WhatsApp</a>
+      <a class="section-link" href="/cart">Back to cart</a>
+    </div>
+    {% else %}
     <form class="checkout-form" method="post" action="/checkout">
       <input type="hidden" name="csrf" value="{{ csrf }}">
       <label>Your name
@@ -47,6 +55,7 @@
       </label>
       <button class="btn btn-primary btn-wide" type="submit">Continue to payment</button>
     </form>
+    {% endif %}
 
     <aside class="order-summary">
       <h2>Order summary</h2>

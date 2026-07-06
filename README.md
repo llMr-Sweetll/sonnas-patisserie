@@ -61,7 +61,9 @@ cargo run
 
 Visit `http://localhost:3000` (store) and `http://localhost:3000/admin` (admin).
 Payments, WhatsApp, and the AI bot each activate when their env keys are set —
-everything else works without them.
+everything else works without them. Until the Razorpay key pair is present, web
+checkout sends the customer's prepared cart to WhatsApp instead of creating a
+pending payment order.
 
 ## Repository map
 

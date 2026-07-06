@@ -9,8 +9,8 @@ use serde::Deserialize;
 
 use crate::auth::{csrf_ok, ensure_csrf};
 use crate::cart::{clear_cart, read_cart};
-use crate::models::{Category, DELIVERY_SLOTS, Order, is_deliverable};
-use crate::routes::store::{CartView, build_cart_view};
+use crate::models::{CartLine, Category, DELIVERY_SLOTS, Order, is_deliverable};
+use crate::routes::store::{CartView, build_cart_view, whatsapp_cart_link};
 use crate::{AppResult, AppState, db, razorpay, whatsapp};
 
 #[derive(Template)]
@@ -19,6 +19,8 @@ pub struct CheckoutTemplate {
     pub categories: Vec<Category>,
     pub lines: Vec<CartView>,
     pub subtotal: i64,
+    pub wa_link: String,
+    pub payment_ready: bool,
     pub csrf: String,
     pub min_date: String,
     pub slots: &'static [&'static str],
@@ -40,6 +42,30 @@ pub struct PaymentTemplate {
 
 crate::impl_template_response!(CheckoutTemplate, PaymentTemplate);
 
+async fn checkout_template(
+    state: &AppState,
+    jar: CookieJar,
+    cart: &[CartLine],
+    error: Option<String>,
+) -> AppResult<(CookieJar, CheckoutTemplate)> {
+    let (lines, subtotal) = build_cart_view(state, cart).await?;
+    let wa_link = whatsapp_cart_link(&state.cfg.owner_whatsapp_number, &lines);
+    let (jar, csrf) = ensure_csrf(jar);
+    let t = CheckoutTemplate {
+        categories: db::list_categories(&state.db).await?,
+        lines,
+        subtotal,
+        wa_link,
+        payment_ready: state.cfg.razorpay_checkout_ready(),
+        csrf,
+        min_date: Local::now().date_naive().to_string(),
+        slots: DELIVERY_SLOTS,
+        cart_count: cart.len(),
+        error,
+    };
+    Ok((jar, t))
+}
+
 async fn checkout_form(
     State(state): State<AppState>,
     jar: CookieJar,
@@ -48,18 +74,7 @@ async fn checkout_form(
     if cart.is_empty() {
         return Ok((jar, Redirect::to("/cart")).into_response());
     }
-    let (lines, subtotal) = build_cart_view(&state, &cart).await?;
-    let (jar, csrf) = ensure_csrf(jar);
-    let t = CheckoutTemplate {
-        categories: db::list_categories(&state.db).await?,
-        lines,
-        subtotal,
-        csrf,
-        min_date: Local::now().date_naive().to_string(),
-        slots: DELIVERY_SLOTS,
-        cart_count: cart.len(),
-        error: None,
-    };
+    let (jar, t) = checkout_template(&state, jar, &cart, None).await?;
     Ok((jar, t).into_response())
 }
 
@@ -132,18 +147,17 @@ async fn checkout_submit(
         return Ok((axum::http::StatusCode::FORBIDDEN, "Invalid request token").into_response());
     }
     if let Err(msg) = validate(&form) {
-        let (lines, subtotal) = build_cart_view(&state, &cart).await?;
-        let (jar, csrf) = ensure_csrf(jar);
-        let t = CheckoutTemplate {
-            categories: db::list_categories(&state.db).await?,
-            lines,
-            subtotal,
-            csrf,
-            min_date: Local::now().date_naive().to_string(),
-            slots: DELIVERY_SLOTS,
-            cart_count: cart.len(),
-            error: Some(msg.to_string()),
-        };
+        let (jar, t) = checkout_template(&state, jar, &cart, Some(msg.to_string())).await?;
+        return Ok((jar, t).into_response());
+    }
+    if !state.cfg.razorpay_checkout_ready() {
+        let (jar, t) = checkout_template(
+            &state,
+            jar,
+            &cart,
+            Some("Online payment is being connected. Please order on WhatsApp for now.".into()),
+        )
+        .await?;
         return Ok((jar, t).into_response());
     }
 
