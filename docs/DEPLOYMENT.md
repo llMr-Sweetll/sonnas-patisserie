@@ -54,8 +54,13 @@ it falls back to the tappable menus and skips natural-language understanding.
 
 ```sh
 openssl rand -hex 32                                   # → SESSION_SECRET
+openssl rand -hex 24                                   # → CRON_SECRET (birthday cron)
 cargo run --bin hash-password -- 'strong-admin-pass'   # → ADMIN_PASSWORD_HASH
 ```
+
+`CRON_SECRET` guards `POST /tasks/daily`. Vercel Cron (configured in `vercel.json`,
+`0 4 * * *` ≈ 9:30am IST) automatically sends it as `Authorization: Bearer $CRON_SECRET`,
+so just set the env var — the daily birthday-greeting job then runs itself.
 
 ## 6. Vercel
 

@@ -3,8 +3,8 @@
 //! local server uses. The DB pool is created once per instance at cold start.
 
 use tower::ServiceBuilder;
-use vercel_runtime::axum::VercelLayer;
 use vercel_runtime::Error;
+use vercel_runtime::axum::VercelLayer;
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {

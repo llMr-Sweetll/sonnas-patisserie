@@ -1,14 +1,14 @@
 use askama::Template;
+use axum::Router;
 use axum::extract::{Path, State};
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::routing::get;
-use axum::Router;
 use axum_extra::extract::cookie::CookieJar;
 
 use crate::cart::read_cart;
-use crate::models::{status_label, CartLine, Category, Order, OrderItem, Product};
-use crate::{db, AppResult, AppState};
+use crate::models::{CartLine, Category, Order, OrderItem, Product, status_label};
+use crate::{AppResult, AppState, db};
 
 #[derive(Template)]
 #[template(path = "index.html")]

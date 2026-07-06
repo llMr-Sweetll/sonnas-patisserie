@@ -74,7 +74,9 @@ pub struct Customer {
 
 impl Customer {
     pub fn birthday_str(&self) -> String {
-        self.birthday.map(|d| d.format("%d %b").to_string()).unwrap_or_default()
+        self.birthday
+            .map(|d| d.format("%d %b").to_string())
+            .unwrap_or_default()
     }
 }
 

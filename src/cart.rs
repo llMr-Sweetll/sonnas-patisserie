@@ -8,8 +8,8 @@ use axum::{Form, Router};
 use axum_extra::extract::cookie::{Cookie, CookieJar, SameSite};
 use serde::Deserialize;
 
-use crate::models::CartLine;
 use crate::AppState;
+use crate::models::CartLine;
 
 const CART_COOKIE: &str = "sp_cart";
 const MAX_LINES: usize = 20;

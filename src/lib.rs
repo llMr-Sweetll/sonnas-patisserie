@@ -8,13 +8,13 @@ pub mod routes;
 pub mod whatsapp;
 
 use axum::{
-    http::{header, HeaderValue},
+    Router,
+    http::{HeaderValue, header},
     middleware::{self, Next},
     response::{IntoResponse, Response},
-    Router,
 };
-use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
+use sqlx::postgres::PgPoolOptions;
 use std::sync::Arc;
 
 #[derive(Clone)]

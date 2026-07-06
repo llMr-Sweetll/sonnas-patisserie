@@ -5,12 +5,12 @@
 //! pre-approved templates — see docs/DEPLOYMENT.md.
 
 use hmac::{Hmac, Mac};
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use sha2::Sha256;
 use subtle::ConstantTimeEq;
 
-use crate::models::{Order, OrderItem};
 use crate::AppState;
+use crate::models::{Order, OrderItem};
 
 const GRAPH: &str = "https://graph.facebook.com/v21.0";
 

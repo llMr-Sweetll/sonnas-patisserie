@@ -446,10 +446,12 @@ pub async fn set_customer_birthday(
 }
 
 pub async fn list_customers(pool: &PgPool, limit: i64) -> sqlx::Result<Vec<Customer>> {
-    sqlx::query_as("select * from customers order by last_order_at desc nulls last, first_seen desc limit $1")
-        .bind(limit)
-        .fetch_all(pool)
-        .await
+    sqlx::query_as(
+        "select * from customers order by last_order_at desc nulls last, first_seen desc limit $1",
+    )
+    .bind(limit)
+    .fetch_all(pool)
+    .await
 }
 
 /// Customers whose birthday is today and who haven't been greeted this year.
@@ -528,8 +530,13 @@ pub async fn update_promotion(pool: &PgPool, id: i64, p: &PromotionInput) -> sql
          image_url=$6, active=$7, sort_order=$8 where id=$1",
     )
     .bind(id)
-    .bind(&p.title).bind(&p.subtitle).bind(&p.cta_label).bind(&p.cta_href)
-    .bind(&p.image_url).bind(p.active).bind(p.sort_order)
+    .bind(&p.title)
+    .bind(&p.subtitle)
+    .bind(&p.cta_label)
+    .bind(&p.cta_href)
+    .bind(&p.image_url)
+    .bind(p.active)
+    .bind(p.sort_order)
     .execute(pool)
     .await?;
     Ok(())

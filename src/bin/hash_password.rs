@@ -1,9 +1,9 @@
 //! Generates the argon2id hash for ADMIN_PASSWORD_HASH.
 //! Usage: cargo run --bin hash-password -- 'your-admin-password'
 
+use argon2::Argon2;
 use argon2::password_hash::rand_core::OsRng;
 use argon2::password_hash::{PasswordHasher, SaltString};
-use argon2::Argon2;
 
 fn main() {
     let password = std::env::args().nth(1).unwrap_or_else(|| {

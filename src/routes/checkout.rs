@@ -9,9 +9,9 @@ use serde::Deserialize;
 
 use crate::auth::{csrf_ok, ensure_csrf};
 use crate::cart::{clear_cart, read_cart};
-use crate::models::{is_deliverable, Category, Order, DELIVERY_SLOTS};
-use crate::routes::store::{build_cart_view, CartView};
-use crate::{db, razorpay, whatsapp, AppResult, AppState};
+use crate::models::{Category, DELIVERY_SLOTS, Order, is_deliverable};
+use crate::routes::store::{CartView, build_cart_view};
+use crate::{AppResult, AppState, db, razorpay, whatsapp};
 
 #[derive(Template)]
 #[template(path = "checkout.html")]

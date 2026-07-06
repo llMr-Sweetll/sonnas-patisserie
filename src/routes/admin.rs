@@ -13,8 +13,8 @@ use crate::auth::{
     is_admin, login_allowed, record_login_failure, verify_password,
 };
 use crate::db::{self, DailyStat, ProductInput, StatusCount, TopProduct};
-use crate::models::{Category, Order, OrderItem, Product, ORDER_STATUSES};
-use crate::{whatsapp, AppError, AppResult, AppState};
+use crate::models::{Category, ORDER_STATUSES, Order, OrderItem, Product};
+use crate::{AppError, AppResult, AppState, whatsapp};
 
 // --- Templates ---
 
@@ -289,7 +289,11 @@ async fn dashboard(State(state): State<AppState>) -> AppResult<DashboardTemplate
     Ok(DashboardTemplate {
         revenue_30d,
         orders_30d,
-        aov: if orders_30d > 0 { revenue_30d / orders_30d } else { 0 },
+        aov: if orders_30d > 0 {
+            revenue_30d / orders_30d
+        } else {
+            0
+        },
         pending_count: status_counts
             .iter()
             .filter(|s| s.status == "paid" || s.status == "confirmed")
@@ -304,7 +308,12 @@ async fn dashboard(State(state): State<AppState>) -> AppResult<DashboardTemplate
         },
         revenue_bars: revenue_bars(&stats),
         new_customer_bars: count_bars(&new_customers),
-        top_max: top_products.iter().map(|t| t.revenue_inr).max().unwrap_or(1).max(1),
+        top_max: top_products
+            .iter()
+            .map(|t| t.revenue_inr)
+            .max()
+            .unwrap_or(1)
+            .max(1),
         top_products,
         category_bars: hbars(&category, |v| format!("₹{v}")),
         source_split: hbars(&source, |v| v.to_string()),
@@ -332,7 +341,14 @@ async fn promotions(State(state): State<AppState>) -> AppResult<PromotionsTempla
 
 async fn promotion_new_form(jar: CookieJar) -> impl IntoResponse {
     let (jar, csrf) = ensure_csrf(jar);
-    (jar, PromotionFormTemplate { promotion: None, csrf, error: None })
+    (
+        jar,
+        PromotionFormTemplate {
+            promotion: None,
+            csrf,
+            error: None,
+        },
+    )
 }
 
 async fn promotion_edit_form(
@@ -344,7 +360,15 @@ async fn promotion_edit_form(
         return Ok((StatusCode::NOT_FOUND, "No such promotion").into_response());
     };
     let (jar, csrf) = ensure_csrf(jar);
-    Ok((jar, PromotionFormTemplate { promotion: Some(promotion), csrf, error: None }).into_response())
+    Ok((
+        jar,
+        PromotionFormTemplate {
+            promotion: Some(promotion),
+            csrf,
+            error: None,
+        },
+    )
+        .into_response())
 }
 
 #[derive(Deserialize)]
@@ -397,7 +421,15 @@ async fn promotion_create(
     }
     if form.title.trim().is_empty() {
         let (jar, csrf) = ensure_csrf(jar);
-        return Ok((jar, PromotionFormTemplate { promotion: None, csrf, error: Some("Title is required.".into()) }).into_response());
+        return Ok((
+            jar,
+            PromotionFormTemplate {
+                promotion: None,
+                csrf,
+                error: Some("Title is required.".into()),
+            },
+        )
+            .into_response());
     }
     db::insert_promotion(&state.db, &form.to_input()).await?;
     Ok(Redirect::to("/admin/promotions").into_response())

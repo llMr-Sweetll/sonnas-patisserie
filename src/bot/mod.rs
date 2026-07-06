@@ -10,11 +10,11 @@ pub mod claude;
 pub mod faq;
 
 use chrono::{Datelike, Duration, Local, NaiveDate};
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 
-use crate::models::{is_deliverable, CartLine, DELIVERY_SLOTS};
-use crate::whatsapp::{send_buttons, send_list, send_text, ListRow};
-use crate::{db, razorpay, AppResult, AppState};
+use crate::models::{CartLine, DELIVERY_SLOTS, is_deliverable};
+use crate::whatsapp::{ListRow, send_buttons, send_list, send_text};
+use crate::{AppResult, AppState, db, razorpay};
 
 const SHOP_GREETING: &str = "Welcome to *Sonna's Patisserie* 🧁\nArtisanal, 100% vegetarian cakes & desserts, baked fresh in Hubli and delivered to your door (2pm–10pm, closed Tuesdays).";
 

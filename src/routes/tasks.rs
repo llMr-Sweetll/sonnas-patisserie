@@ -1,14 +1,14 @@
 //! Scheduled tasks, triggered by Vercel Cron (see vercel.json). Guarded by a
 //! shared secret so only the scheduler can invoke them.
 
+use axum::Router;
 use axum::extract::State;
 use axum::http::{HeaderMap, StatusCode};
 use axum::response::IntoResponse;
 use axum::routing::post;
-use axum::Router;
 use subtle::ConstantTimeEq;
 
-use crate::{db, whatsapp, AppState};
+use crate::{AppState, db, whatsapp};
 
 fn authorized(headers: &HeaderMap, secret: &str) -> bool {
     if secret.is_empty() {

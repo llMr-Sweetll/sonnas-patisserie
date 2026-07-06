@@ -3,11 +3,11 @@
 //! and acts through a fixed tool set. All side effects go through tools;
 //! prices and availability always come from the DB.
 
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 
 use crate::models::CartLine;
 use crate::whatsapp::send_text;
-use crate::{db, AppResult, AppState};
+use crate::{AppResult, AppState, db};
 
 const MODEL: &str = "claude-haiku-4-5";
 const MAX_TOOL_TURNS: usize = 6;
@@ -105,7 +105,10 @@ async fn run_tool(
             match chrono::NaiveDate::from_ymd_opt(2000, m, d) {
                 Some(bd) => {
                     let _ = db::set_customer_birthday(&state.db, phone, None, bd).await;
-                    format!("Saved birthday {}. Tell the customer you'll remember it.", bd.format("%d %B"))
+                    format!(
+                        "Saved birthday {}. Tell the customer you'll remember it.",
+                        bd.format("%d %B")
+                    )
                 }
                 None => "Invalid date.".into(),
             }
@@ -113,16 +116,18 @@ async fn run_tool(
         "search_products" => {
             let query = input["query"].as_str().unwrap_or_default();
             match db::search_products(&state.db, query).await {
-                Ok(products) => json!(products
-                    .iter()
-                    .map(|p| json!({
-                        "id": p.id,
-                        "name": p.name,
-                        "price_inr": p.price_inr,
-                        "description": p.description,
-                        "eggless_available": p.is_eggless_available,
-                    }))
-                    .collect::<Vec<_>>())
+                Ok(products) => json!(
+                    products
+                        .iter()
+                        .map(|p| json!({
+                            "id": p.id,
+                            "name": p.name,
+                            "price_inr": p.price_inr,
+                            "description": p.description,
+                            "eggless_available": p.is_eggless_available,
+                        }))
+                        .collect::<Vec<_>>()
+                )
                 .to_string(),
                 Err(e) => format!("search failed: {e}"),
             }

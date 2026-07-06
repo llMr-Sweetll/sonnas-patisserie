@@ -1,7 +1,7 @@
 //! Razorpay REST client: orders, payment links, signature verification.
 
 use hmac::{Hmac, Mac};
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use sha2::Sha256;
 use subtle::ConstantTimeEq;
 
