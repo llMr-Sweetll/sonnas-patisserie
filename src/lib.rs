@@ -33,6 +33,7 @@ pub struct Config {
     pub supabase_url: String,
     pub supabase_service_role_key: String,
     pub base_url: String,
+    pub cron_secret: String,
 }
 
 fn env(key: &str) -> String {
@@ -68,6 +69,7 @@ impl Config {
                     b
                 }
             },
+            cron_secret: env("CRON_SECRET"),
         }
     }
 }
@@ -315,6 +317,7 @@ pub fn build_router(state: AppState) -> Router {
         .merge(routes::store::router())
         .merge(routes::checkout::router())
         .merge(routes::webhook::router())
+        .merge(routes::tasks::router())
         .merge(routes::admin::router(state.clone()))
         .merge(cart::router())
         .route("/public/style.css", axum::routing::get(style_css))

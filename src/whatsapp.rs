@@ -193,6 +193,19 @@ pub async fn notify_order_paid(state: &AppState, order: &Order, items: &[OrderIt
     send_text(state, &order.phone, &customer_msg).await;
 }
 
+/// Sends a birthday greeting to a customer (called by the daily cron).
+/// Note: outside the 24-hour service window this requires a Meta-approved
+/// template — see docs/WHATSAPP_TEMPLATES.md. Here we send a friendly text.
+pub async fn send_birthday_greeting(state: &AppState, phone: &str, name: Option<&str>) {
+    let who = name.map(|n| format!(" {n}")).unwrap_or_default();
+    let msg = format!(
+        "Happy birthday{who}! 🎂 From all of us at Sonna's Patisserie — here's to a sweet year. \
+         Treat yourself today: reply here or visit {}, and mention BIRTHDAY for a little something on us. 💛",
+        state.cfg.base_url
+    );
+    send_text(state, phone, &msg).await;
+}
+
 /// Admin changed the order status → tell the customer.
 pub async fn notify_status_change(state: &AppState, order: &Order) {
     let line = match order.status.as_str() {
