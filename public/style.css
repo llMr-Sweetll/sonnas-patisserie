@@ -509,8 +509,10 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, .btn:focus-vi
 .chip { background: var(--blush); border-radius: 999px; padding: 0.2rem 0.8rem; font-size: 0.82rem; }
 
 @media (max-width: 640px) {
-  .site-header { gap: 0.8rem 1.2rem; }
-  .site-nav { order: 3; width: 100%; gap: 1rem; font-size: 0.78rem; }
+  .site-header { gap: 0.6rem 1rem; }
+  /* Break the nav onto its own full-width row and let it scroll if needed,
+     so the header can never force horizontal overflow. */
+  .site-nav { order: 3; flex: 0 0 100%; width: 100%; gap: 0.6rem 1rem; font-size: 0.76rem; overflow-x: auto; }
   .cart-link { margin-left: auto; }
 }
 
